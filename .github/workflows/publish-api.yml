@@ -23,7 +23,7 @@ jobs:
         working-directory: ./api
         env:
           IS_MAVEN_PUB: true
-          DEPLOY_TO_GITHUB_PACKAGES_URL: https://maven.pkg.github.com/3arthqu4ke/hmc-specifics
+          DEPLOY_TO_GITHUB_PACKAGES_URL: https://maven.pkg.github.com/headlesshq/hmc-specifics
           GITHUB_USER: ${{ github.actor }}
           GITHUB_TOKEN: ${{ github.token }}
         run: ./gradlew publish
