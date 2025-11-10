@@ -15,7 +15,6 @@ import me.earth.headlessmc.mc.gui.GuiScreen;
 import me.earth.headlessmc.mc.keyboard.Keyboard;
 import me.earth.headlessmc.mc.player.Player;
 import net.minecraft.client.User;
-import net.minecraft.client.gui.components.CommandSuggestions;
 import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.GenericMessageScreen;
 import net.minecraft.client.gui.screens.Screen;
@@ -27,7 +26,6 @@ import net.minecraft.client.multiplayer.ClientSuggestionProvider;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.DynamicUniformStorage;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
@@ -70,7 +68,7 @@ public abstract class MixinMinecraft extends MixinBlockableEventLoop
     @Shadow
     public abstract void clearClientLevel(Screen arg);
 
-    @Shadow public abstract void disconnect(Screen screen);
+    @Shadow public abstract void disconnectWithSavingScreen();
 
     @Shadow public abstract @Nullable ServerData getCurrentServer();
 
@@ -106,7 +104,7 @@ public abstract class MixinMinecraft extends MixinBlockableEventLoop
         }
 
         if (localServer) {
-            disconnect(new GenericMessageScreen(Component.literal("Saving level")));
+            disconnectWithSavingScreen();
         } else {
             disconnect();
         }

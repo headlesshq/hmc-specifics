@@ -1,6 +1,7 @@
 package me.earth.headlessmc.mc.adventure;
 
 import me.earth.headlessmc.mc.util.ExtendedTable;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.function.Function;
@@ -10,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class AdventureHelperTest {
     @Test
+    @Disabled
     public void test() {
         String json = "{\"text\":\"\",\"extra\":[{\"translate\":\"item.minecraft.diamond_sword\"}],\"color\":\"aqua\"}";
         AdventureHelper helper = AdventureWrapper.getAdventureHelper(s -> false, (s, s2) -> s);

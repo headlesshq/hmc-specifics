@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "headlessmc",
+  "version": "${version}",
+
+  "name": "HMC-Specifics",
+  "description": "Version specific implementations of the HMC Runtime",
+  "authors": [
+    "3arthqu4ke"
+  ],
+  "contact": {
+    "homepage": "https://github.com/3arthqu4ke/hmc-specifics",
+    "sources": "https://github.com/3arthqu4ke/hmc-specifics"
+  },
+
+  "license": "MIT",
+
+  "environment": "*",
+  "mixins": [
+    "mixins.headlessmc.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.14.19",
+    "minecraft": "~1.21.0",
+    "java": ">=8"
+  }
+}

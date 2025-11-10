@@ -1,0 +1,20 @@
+modLoader = "javafml"
+loaderVersion = "[1,)"
+issueTrackerURL = "https://github.com/3arthqu4ke/hmc-specifics"
+license = "MIT"
+
+[[mods]]
+modId = "headlessmc"
+version = "${version}"
+displayName = "HMC-Specifics"
+authors = "3arthqu4ke"
+description = '''
+    Version specific implementations of the HMC Runtime
+'''
+
+[[dependencies.headlessmc]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.21.0,)"
+ordering = "NONE"
+side = "BOTH"
