@@ -7,6 +7,7 @@ import me.earth.headlessmc.api.command.CommandException;
 import me.earth.headlessmc.api.command.CommandUtil;
 import me.earth.headlessmc.api.command.ParseUtil;
 import me.earth.headlessmc.mc.Minecraft;
+import me.earth.headlessmc.mc.keyboard.HmcKeyboard;
 import me.earth.headlessmc.mc.keyboard.Key;
 import me.earth.headlessmc.mc.keyboard.Keyboard;
 import me.earth.headlessmc.mc.keyboard.RobotKeyboard;
@@ -33,7 +34,7 @@ public class KeyCommand extends AbstractMinecraftCommand implements ScheduledCom
         Keyboard keyboard = CommandUtil.hasFlag("-robot", args)
                                 || CommandUtil.hasFlag("-robot-list", args)
                 ? new RobotKeyboard()
-                : mc.getKeyboard();
+                : HmcKeyboard.getInstance().getMcKeyboard(mc);
 
         if (args.length <= 1 || CommandUtil.hasFlag("-robot-list", args)) {
             ctx.log(new ExtendedTable<Key>()

@@ -13,7 +13,8 @@
     "MixinFont",
     "MixinLocalPlayer",
     "MixinMinecraft",
-    "MixinScreen"
+    "MixinScreen",
+    "MixinInputConstants"
   ],
   "injectors": {
     "maxShiftBy": 10

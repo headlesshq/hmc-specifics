@@ -1,6 +1,7 @@
 package me.earth.headlessmc.mc;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import me.earth.headlessmc.mc.keyboard.AbstractKeyboard;
 import me.earth.headlessmc.mc.keyboard.Key;
 import me.earth.headlessmc.mc.keyboard.Keyboard;
 import me.earth.headlessmc.mc.mixins.IInputConstantsKey;
@@ -10,7 +11,7 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.Iterator;
 
-public class KeyboardImpl implements Keyboard {
+public class KeyboardImpl extends AbstractKeyboard implements Keyboard {
     private final Minecraft mc;
 
     public KeyboardImpl(Minecraft mc) {
@@ -18,7 +19,7 @@ public class KeyboardImpl implements Keyboard {
     }
 
     @Override
-    public void press(Key key) {
+    public void performKeyPress(Key key) {
         mc.keyboardHandler.keyPress(
                 mc.getWindow().getWindow(),
                 key.getId(),
@@ -28,7 +29,7 @@ public class KeyboardImpl implements Keyboard {
     }
 
     @Override
-    public void release(Key key) {
+    public void performKeyRelease(Key key) {
         mc.keyboardHandler.keyPress(
                 mc.getWindow().getWindow(),
                 key.getId(),

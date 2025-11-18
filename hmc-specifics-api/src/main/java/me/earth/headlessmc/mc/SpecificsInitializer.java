@@ -6,6 +6,7 @@ import me.earth.headlessmc.api.config.Config;
 import me.earth.headlessmc.jline.JLineProperties;
 import me.earth.headlessmc.mc.commands.MinecraftContext;
 import me.earth.headlessmc.mc.jline.VersionAgnosticJLineCommandLineReader;
+import me.earth.headlessmc.mc.keyboard.HmcKeyboard;
 import me.earth.headlessmc.mc.log4j.HMCLog4JAppender;
 import me.earth.headlessmc.runtime.RuntimeInitializer;
 
@@ -21,6 +22,7 @@ public class SpecificsInitializer extends RuntimeInitializer {
 
     public SpecificsInitializer(Minecraft mc) {
         this.mc = mc;
+        HmcKeyboard.getInstance().getMcKeyboard(mc);
     }
 
     public void init(Config config) {
