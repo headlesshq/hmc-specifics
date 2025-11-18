@@ -233,14 +233,6 @@ jobs:
           fi
         shell: bash
 
-      - name: Get mc-runtime-test
-        uses: robinraju/release-downloader@a96f54c1b5f5e09e47d9504526e96febd949d4c2 # v1.11
-        with:
-          repository: headlesshq/mc-runtime-test
-          tag: 4.1.0
-          fileName: 'mc-runtime-test-${{ matrix.version.mc }}-*-4.1.0-release.jar'
-          out-file-path: run/mods
-
       - name: Configure game
         run: |
           cat <<EOF >> run/options.txt
