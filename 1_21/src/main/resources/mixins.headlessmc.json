@@ -19,6 +19,7 @@
     "maxShiftBy": 10
   },
   "client": [
+    "AbstractContainerScreenAccessor",
     "MixinChatComponent"
   ]
 }
