@@ -1,0 +1,15 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "bootstrap-sha": "c1925a629c3b27d6001a151c93d1f0bc7bc2599e",
+  "packages": {
+    ".": {
+      "include-component-in-tag": false,
+      "include-v-in-tag": false,
+      "package-name": "hmc-specifics",
+      "release-type": "simple",
+      "extra-files": [
+        "hmc-specifics-api/gradle.properties"
+      ]
+    }
+  }
+}
