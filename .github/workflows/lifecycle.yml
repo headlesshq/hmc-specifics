@@ -210,7 +210,7 @@ jobs:
           hmc.jline.enabled=false
           hmc.rethrow.launch.exceptions=true
           hmc.exit.on.failed.command=true
-          hmc.test.filename=./headlessmc-test/hmc-specifics-test.json
+          hmc.test.filename=./hmc-specifics-test.json
           hmc.loglevel=INFO
           EOF
         shell: bash
