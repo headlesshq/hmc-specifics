@@ -26,6 +26,9 @@ concurrency: # FIXME: prevent release commit cancellation
     ${{ github.event.inputs.ref || github.ref }}
   cancel-in-progress: true
 
+env:
+  HMC_VERSION: 2.7.1
+
 jobs:
   release-please:
     name: Release Please
@@ -134,9 +137,15 @@ jobs:
                 # If a release is created, use the full matrices
                 build_matrix['include'], run_matrix['version'] = build_data, run_data
 
+          for item in run_data:
+              print(item)
+
+          for item in build_data:
+              print(item)
+
           if dirs_to_filter:
             build_matrix['include'].extend([item for item in build_data if item["dir"] in dirs_to_filter and (item["mc"] in mc_versions or not mc_versions)])
-            mc_versions = mc_versions if mc_versions else [item.get("mc") for item in build_matrix["include"] if "mc" in item]
+            mc_versions = mc_versions if mc_versions else [item.get("mc") for item in build_matrix["include"] if "mc" in item]          
             run_matrix['version'].extend([item for item in run_data if item["mc"] in mc_versions])
 
           with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
@@ -216,8 +225,8 @@ jobs:
         uses: robinraju/release-downloader@a96f54c1b5f5e09e47d9504526e96febd949d4c2 # v1.11
         with:
           repository: 3arthqu4ke/headlessmc
-          tag: 2.7.1
-          fileName: headlessmc-launcher-2.7.1.jar
+          tag: ${{ env.HMC_VERSION }}
+          fileName: headlessmc-launcher-${{ env.HMC_VERSION }}.jar
 
       - name: Cache Minecraft
         uses: actions/cache@v4
@@ -228,8 +237,8 @@ jobs:
       - name: Download ${{ matrix.version.mc }}-${{ matrix.version.modloader }}
         run: |
           if [ ! -f "$HOME/.minecraft/versions/${{ matrix.version.mc }}/${{ matrix.version.mc }}.json" ]; then
-            java -jar headlessmc-launcher-2.7.1.jar --command download ${{ matrix.version.mc }}
-            java -jar headlessmc-launcher-2.7.1.jar --command ${{ matrix.version.modloader }} ${{ matrix.version.mc }} --java ${{ matrix.version.java }}
+            java -jar headlessmc-launcher-${{ env.HMC_VERSION }}.jar --command download ${{ matrix.version.mc }}
+            java -jar headlessmc-launcher-${{ env.HMC_VERSION }}.jar --command ${{ matrix.version.modloader }} ${{ matrix.version.mc }} --java ${{ matrix.version.java }}
           fi
         shell: bash
 
