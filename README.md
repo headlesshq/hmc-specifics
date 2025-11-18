@@ -37,9 +37,8 @@ commands [here](https://github.com/headlesshq/HeadlessMc/issues/8#issuecomment-1
 The HMC-Specifics currently support the following Minecraft versions and modloaders:
 | Version | Forge | Fabric | NeoForge |
 | :-: | :-: | :-: | :-: |
-| 1.21 | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
-| 1.20.6 | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
-| 1.20.1-1.20.4 | :x:  | :x:  | :x:  |
+| 1.21 - 1.21.5 | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
+| 1.20.1 - 1.20.6 | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  |
 | 1.19.4 | :white_check_mark:  | :white_check_mark:  | - |
 | 1.18.2 | :white_check_mark:  | :white_check_mark:  | - |
 | 1.17.1 | :white_check_mark:  | :white_check_mark:  | - |
