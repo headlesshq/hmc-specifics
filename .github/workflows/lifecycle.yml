@@ -245,7 +245,7 @@ jobs:
         shell: bash
 
       - name: Run game
-        run: java -jar headlessmc-launcher-${{ inputs.hmc-version }}.jar --command launch ${{ inputs.regex }} -regex -lwjgl --retries 3 --jvm -Djava.awt.headless=true
+        run: java -jar headlessmc-launcher-${{ env.HMC_VERSION }}.jar --command launch ${{ matrix.version.regex }} -regex -lwjgl --retries 3 --jvm -Djava.awt.headless=true
 
   release:
     if: needs.release-please.outputs.release_created == 'true'
