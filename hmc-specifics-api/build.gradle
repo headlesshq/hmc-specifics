@@ -3,6 +3,7 @@ plugins {
     id 'maven-publish'
 }
 
+ext.project_version = project.property('project_version')
 group 'me.earth.headlessmc'
 version "${project_version}"
 
