@@ -65,6 +65,13 @@ jobs:
       - if: |
           steps.cache.outputs.cache-hit != 'true'
           && !inputs.release
+        name: Give gradlew permissions
+        run: chmod +x gradlew
+        working-directory: ${{ inputs.dir }}
+
+      - if: |
+          steps.cache.outputs.cache-hit != 'true'
+          && !inputs.release
         name: Gradle build
         run: >
           ./gradlew build --stacktrace
