@@ -39,7 +39,7 @@ jobs:
         with:
           fetch-depth: 1
           sparse-checkout: |
-            api
+            hmc-specifics-api
             ${{ inputs.dir }}
 
       - name: Cache build
