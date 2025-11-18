@@ -17,8 +17,8 @@ public abstract class MixinFont {
     // for some reason these do not work when running 1.21.5 in my IDE
     // EVEN WITH require = 0 wtf
     @Inject(
-            method = "renderText(Lnet/minecraft/util/FormattedCharSequence;FFIZLorg/joml/Matrix4f;Lnet/minecraft/client/renderer/MultiBufferSource;Lnet/minecraft/client/gui/Font$DisplayMode;II)F",
-            at = @At("HEAD"))
+        method = "renderText(Lnet/minecraft/util/FormattedCharSequence;FFIZLorg/joml/Matrix4f;Lnet/minecraft/client/renderer/MultiBufferSource;Lnet/minecraft/client/gui/Font$DisplayMode;II)F",
+        at = @At("HEAD"))
     private void renderTextHook0(FormattedCharSequence sequence,
                                  float x, float y, int color,
                                  boolean dropShadow,
@@ -28,7 +28,7 @@ public abstract class MixinFont {
                                  CallbackInfoReturnable<Float> cir) {
         if (FontRendererImpl.INSTANCE.hasListeners()) {
             FontRendererImpl.INSTANCE.onRender(
-                    CharSinkUtil.toString(sequence), x, y);
+                CharSinkUtil.toString(sequence), x, y);
         }
     }
 
@@ -51,7 +51,7 @@ public abstract class MixinFont {
                                           int k, CallbackInfo ci) {
         if (FontRendererImpl.INSTANCE.hasListeners()) {
             FontRendererImpl.INSTANCE.onRender(
-                    CharSinkUtil.toString(sequence), x, y);
+                CharSinkUtil.toString(sequence), x, y);
         }
     }
 
