@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.Iterator;
+import java.util.stream.Collectors;
 
 public class KeyboardImpl extends AbstractKeyboard implements Keyboard {
     private final Minecraft mc;
@@ -49,7 +50,7 @@ public class KeyboardImpl extends AbstractKeyboard implements Keyboard {
                         k.getType() == InputConstants.Type.SCANCODE ? -1 : k.getValue(),
                         k.getType() == InputConstants.Type.SCANCODE ? k.getValue() : -1))
                 .sorted()
-                .toList()
+                .collect(Collectors.toList())
                 .iterator();
     }
 
