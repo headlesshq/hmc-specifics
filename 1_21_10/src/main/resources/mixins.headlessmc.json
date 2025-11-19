@@ -11,16 +11,17 @@
     "MixinButton",
     "MixinEditBox",
     "MixinFont",
+    "MixinInputConstants",
     "MixinLocalPlayer",
     "MixinMinecraft",
-    "MixinScreen",
-    "MixinInputConstants"
+    "MixinScreen"
   ],
   "injectors": {
     "maxShiftBy": 10
   },
   "client": [
     "AbstractContainerScreenAccessor",
+    "IKeyboardHandler",
     "MixinChatComponent"
   ]
 }

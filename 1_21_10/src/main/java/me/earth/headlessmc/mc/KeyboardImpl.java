@@ -5,7 +5,9 @@ import me.earth.headlessmc.mc.keyboard.AbstractKeyboard;
 import me.earth.headlessmc.mc.keyboard.Key;
 import me.earth.headlessmc.mc.keyboard.Keyboard;
 import me.earth.headlessmc.mc.mixins.IInputConstantsKey;
+import me.earth.headlessmc.mc.mixins.IKeyboardHandler;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.input.KeyEvent;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
@@ -20,22 +22,20 @@ public class KeyboardImpl extends AbstractKeyboard implements Keyboard {
 
     @Override
     public void performKeyPress(Key key) {
-        mc.keyboardHandler.keyPress(
-                mc.getWindow().getWindow(),
-                key.getId(),
-                key.getScanCode(),
+        ((IKeyboardHandler) mc.keyboardHandler).keyPress(
+                mc.getWindow().handle(),
                 GLFW.GLFW_PRESS,
-                0);
+                new KeyEvent(key.getId(), key.getScanCode(), 0)
+        );
     }
 
     @Override
     public void performKeyRelease(Key key) {
-        mc.keyboardHandler.keyPress(
-                mc.getWindow().getWindow(),
-                key.getId(),
-                key.getScanCode(),
+        ((IKeyboardHandler) mc.keyboardHandler).keyPress(
+                mc.getWindow().handle(),
                 GLFW.GLFW_RELEASE,
-                0);
+                new KeyEvent(key.getId(), key.getScanCode(), 0)
+        );
     }
 
     @Override
