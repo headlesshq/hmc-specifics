@@ -119,7 +119,7 @@ dependencies {
         exclude module: 'log4j-core'
     }
     jarLibs 'com.github.ImpactDevelopment:SimpleTweaker:1.2'
-    jarLibs('org.spongepowered:mixin:0.7.11-SNAPSHOT') {
+    jarLibs('org.spongepowered:mixin:0.8.5') {
         exclude module: 'launchwrapper'
         exclude module: 'guava'
         exclude module: 'gson'

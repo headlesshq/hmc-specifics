@@ -63,7 +63,7 @@ dependencies {
         transitive false
     }
 
-    compileOnly 'org.spongepowered:mixin:0.8.5-SNAPSHOT'
+    compileOnly 'org.spongepowered:mixin:0.8.5'
     compileOnly 'com.github.ImpactDevelopment:SimpleTweaker:1.2'
     compileOnly ('net.minecraft:launchwrapper:1.12') {
         exclude module: 'log4j-api'
