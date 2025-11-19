@@ -1,0 +1,338 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
+plugins {
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'java'
+    id 'maven-publish'
+    id 'xyz.wagyourtail.unimined' version '1.3.14'
+}
+
+group 'me.earth.headlessmc'
+version "${project(':hmc-specifics-api').project_version}"
+
+base {
+    archivesName = "hmc-specifics-${minecraft_version}"
+}
+
+sourceSets {
+    fabric
+    neoforge
+    lexforge
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        url = "https://files.minecraftforge.net/maven"
+    }
+    maven {
+        name = "sponge"
+        url = "https://repo.spongepowered.org/maven"
+    }
+    maven {
+        url = "https://maven.wagyourtail.xyz/releases"
+    }
+    maven {
+        name = 'impactdevelopment-repo'
+        url = 'https://impactdevelopment.github.io/maven/'
+    }
+    maven {
+        name = '3arthMaven'
+        url = 'https://3arthqu4ke.github.io/maven'
+    }
+
+    // TODO: REMOVE!
+    maven {
+        name = "ossrh" // for MinecraftAuth SNAPSHOTS, TODO: PLEASE RELEASE ON MAVENCENTRAL!
+        url = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+    }
+    maven {
+        name 'JitPackMaven'
+        url 'https://jitpack.io'
+    }
+    maven {
+        name 'SuperDirMaven'
+        url new File(layout.projectDirectory.asFile.getParent() + "/libs").toURI().toURL().toString()
+    }
+}
+
+unimined.minecraft {
+    version project.minecraft_version
+
+    mappings {
+        mojmap()
+        // intermediary()
+        // yarn(1)
+
+        devFallbackNamespace "mojmap"
+
+        /*stub.withMappings("intermediary", ["yarn"]) {
+            c("net/minecraft/class_1927", []) {
+                m("method_55109", "()Lnet/minecraft/class_243;", ["getPos"])
+            }
+        }*/
+    }
+
+    defaultRemapJar = false
+}
+
+unimined.minecraft(sourceSets.fabric) {
+    combineWith(sourceSets.main)
+
+    fabric {
+        loader project.fabric_version
+    }
+
+    defaultRemapJar = true
+}
+
+unimined.minecraft(sourceSets.neoforge) {
+    combineWith(sourceSets.main)
+
+    neoForged {
+        loader project.neoforge_version
+        mixinConfig 'mixins.headlessmc.json'
+    }
+
+    minecraftRemapper.config {
+        // neoforge adds 1 conflict, where 2 interfaces have a method with the same name on yarn/mojmap,
+        // but the method has different names in the intermediary mappings.
+        // this is a conflict because they have a class that extends both interfaces.
+        // this shouldn't be a problem as long as named mappings don't make the name of those 2 methods different.
+        ignoreConflicts(true)
+    }
+
+    defaultRemapJar = true
+}
+
+unimined.minecraft(sourceSets.lexforge) {
+    combineWith(sourceSets.main)
+
+    minecraftForge {
+        loader project.lexforge_version
+        mixinConfig 'mixins.headlessmc.json'
+    }
+
+    minecraftRemapper.config {
+        ignoreConflicts(true)
+    }
+
+    defaultRemapJar = true
+}
+
+configurations {
+    mainImplementation
+    lwjglAgent.extendsFrom runtimeOnly
+    jarLibs
+    implementation.extendsFrom jarLibs
+    fabricJarLibs
+    implementation.extendsFrom jarLibs
+    forgeJarLibs
+    implementation.extendsFrom forgeJarLibs
+}
+
+for (String platform_capitalized : ['Fabric', 'Neoforge', 'Lexforge']) {
+    def platform = platform_capitalized.toLowerCase()
+    def remapJarTask = tasks.named("remap${platform_capitalized}Jar", AbstractArchiveTask).get()
+    def shadowTask = tasks.register("${platform}ShadowJar", ShadowJar) {
+        dependsOn(remapJarTask)
+        it.group = 'build'
+        it.archiveClassifier = "${platform}-release"
+        from remapJarTask.outputs
+        it.excludes += '**module-info.class'
+        it.configurations += [ project.configurations.jarLibs ]
+        if ('fabricShadowJar' != it.name) {
+            if ('lexforgeShadowJar' != it.name) { // on 1.20.6 and 1.21 lexforge ships jline 3.12.1-jna
+                it.configurations += [ project.configurations.forgeJarLibs ]
+            }
+
+            it.dependencies {
+                exclude(dependency('org.jline:jline:.*'))
+                exclude(dependency('com.google.errorprone:error_prone_annotations:.*'))
+                exclude(dependency('com.google.code.gson:gson:.*'))
+                exclude(dependency('net.java.dev.jna:jna:.*'))
+                exclude(dependency('net.java.dev.jna:jna:.*'))
+                exclude(dependency('org.slf4j:slf4j-api:.*'))
+            }
+        } else {
+            it.configurations += [ project.configurations.fabricJarLibs ]
+        }
+    }
+
+    tasks.named('build') { finalizedBy(shadowTask) }
+}
+
+dependencies {
+    compileOnly 'org.spongepowered:mixin:0.8.5-SNAPSHOT'
+    lwjglAgent "me.earth.headlessmc:headlessmc-lwjgl:${project(':hmc-specifics-api').headlessmc_version}"
+    implementation ('net.minecraft:launchwrapper:1.12') {
+        exclude module: 'log4j-api'
+        exclude module: 'log4j-core'
+    }
+
+    jarLibs project(':hmc-specifics-api')
+    jarLibs 'com.github.ImpactDevelopment:SimpleTweaker:1.2'
+    jarLibs "me.earth.headlessmc:headlessmc-api:${project(':hmc-specifics-api').headlessmc_version}"
+    jarLibs "me.earth.headlessmc:headlessmc-runtime:${project(':hmc-specifics-api').headlessmc_version}"
+    jarLibs ("me.earth.headlessmc:headlessmc-jline:${project(':hmc-specifics-api').headlessmc_version}") {
+        exclude module: 'jline'
+    }
+
+    forgeJarLibs (group: 'org.jline', name: 'jline-terminal-jna', version: '3.20.0') {
+        exclude module: 'jline'
+        exclude module: 'jline-terminal'
+    }
+
+    fabricJarLibs (group: 'org.jline', name: 'jline-terminal-jna', version: '3.26.3') {
+        exclude module: 'jline'
+        exclude module: 'jline-terminal'
+    }
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
+}
+
+tasks.register("runnableFabricShadowJar", ShadowJar) {
+    dependsOn(fabricJar)
+    it.group = 'build'
+    it.archiveClassifier = "fabric-dev-run-client"
+    from fabricJar.outputs
+    it.excludes += '**module-info.class'
+    it.configurations += [ project.configurations.jarLibs ]
+    // Mixin is signed
+    exclude 'META-INF/*.RSA'
+    exclude 'META-INF/*.SF'
+}
+
+afterEvaluate {
+    fabricRunClient {
+        dependsOn(runnableFabricShadowJar)
+        standardInput = System.in
+        classpath = classpath.filter {
+            !it.toString().contains("${projectDir}/build/classes/java/".replace('/', File.separator))
+                    && !it.toString().contains("${projectDir}/build/resources/".replace('/', File.separator))
+        }
+
+        classpath += files("${projectDir}/build/libs/hmc-specifics-${minecraft_version}-${version}-fabric-dev-run-client.jar".replace('/', File.separator))
+        systemProperties['hmc.jline.enabled'] = 'false'
+        if (rootProject.property('hmc.lwjgl').toBoolean()) {
+            jvmArgs += ["-javaagent:${configurations.lwjglAgent.files.iterator().next()}"]
+            systemProperties['joml.nounsafe'] = 'true'
+            systemProperties['fabric.systemLibraries'] = "${configurations.lwjglAgent.files.iterator().next()}"
+        }
+    }
+}
+
+processFabricResources {
+    inputs.property "version", project.version
+
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
+}
+
+processNeoforgeResources {
+    inputs.property "version", project.version
+
+    filesMatching("META-INF/neoforge.mods.toml") {
+        expand "version": project.version
+    }
+}
+
+processLexforgeResources {
+    inputs.property "version", project.version
+
+    filesMatching("META-INF/mods.toml") {
+        expand "version": project.version
+    }
+}
+
+// Forge Runs seem to have problems running from the build/classes folder
+// So instead we just run from the built jar
+afterEvaluate {
+    lexforgeRunClient {
+        dependsOn(lexforgeJar)
+        classpath = classpath.filter {
+            !it.toString().contains('hmc-specifics/build/classes/java/'.replace('/', File.separator))
+                    && !it.toString().contains('hmc-specifics/build/resources/'.replace('/', File.separator))
+        }
+
+        classpath += files("${projectDir}/build/libs/hmc-specifics-${version}-lexforge-dev.jar".replace('/', File.separator))
+    }
+
+    neoforgeRunClient {
+        dependsOn(neoforgeJar)
+        classpath = classpath.filter {
+            !it.toString().contains('hmc-specifics/build/classes/java/'.replace('/', File.separator))
+                    && !it.toString().contains('hmc-specifics/build/resources/'.replace('/', File.separator))
+        }
+
+        classpath += files("${projectDir}/build/libs/hmc-specifics-${version}-neoforge-dev.jar".replace('/', File.separator))
+    }
+}
+
+tasks.withType(org.gradle.jvm.tasks.Jar).configureEach {
+    exclude '**module-info.class'
+    from("LICENSE") {
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+        rename { "${it}_${project.archivesBaseName}" }
+    }
+
+    manifest {
+        attributes(
+            'Implementation-Title': 'HMC-Specifics',
+            'MixinConfigs': "mixins.headlessmc.json",
+            'MixinConnector': 'me.earth.headlessmc.mc.tweaker.HeadlessMcMixinConnector',
+            'TweakClass': 'me.earth.headlessmc.mc.tweaker.HeadlessMcMcTweaker',
+            'Implementation-Version': project.version,
+        )
+    }
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            "${name.toLowerCase()}"(MavenPublication) {
+                ((MavenPublication) it).groupId "${group}"
+                ((MavenPublication) it).artifactId "${archivesBaseName.toLowerCase()}"
+                ((MavenPublication) it).version "${version}"
+                from components.java
+                for (String platform: ['Fabric', 'Lexforge', 'Neoforge']) {
+                    String platform_lower = platform.toLowerCase()
+                    artifact tasks.named("${platform_lower}Jar").get()
+                    artifact tasks.named("remap${platform}Jar").get()
+                    artifact tasks.named("${platform_lower}ShadowJar").get()
+                }
+            }
+        }
+
+        repositories {
+            if (System.getenv('DEPLOY_TO_GITHUB_PACKAGES_URL') == null) {
+                maven {
+                    name = 'BuildDirMaven'
+                    url = rootProject.projectDir.toPath().parent.resolve('build').resolve('maven')
+                }
+            } else {
+                maven {
+                    name = 'GithubPagesMaven'
+                    url = System.getenv('DEPLOY_TO_GITHUB_PACKAGES_URL')
+                    credentials {
+                        username = System.getenv('GITHUB_USER')
+                        password = System.getenv('GITHUB_TOKEN')
+                    }
+                }
+            }
+        }
+    }
+}
+
+sourceSets {
+    test {
+        compileClasspath += main.compileClasspath + main.runtimeClasspath + main.output
+        runtimeClasspath += main.compileClasspath + main.runtimeClasspath + main.output
+    }
+}
+
+test {
+    useJUnitPlatform()
+}

@@ -112,10 +112,13 @@ jobs:
                 print("PR-comment:", comment_body)
                 if comment_body:
                   pattern = r'Automatic commit: build and run ([0-9\.]*[0-9]*) in ([0-9_]*[0-9]*)'
-                  match = re.search(pattern, comment_body)
-                  if match:
-                    mc_versions = [ match.group(1) ]
-                    dirs_to_filter = [ match.group(2) ]
+                  matches = re.findall(pattern, comment_body)
+                  if matches:
+                    mc_versions = []
+                    dirs_to_filter = []
+                    for version, directory in matches:
+                      mc_versions.append(version)
+                      dirs_to_filter.append(directory)
                     print('Matched PR body', mc_versions, dirs_to_filter)
                   else:
                     print('PR body did not match')
