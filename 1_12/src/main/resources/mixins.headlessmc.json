@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_8",
   "mixins": [
     "IBootstrap",
+    "IGuiContainer",
     "IMinecraft",
     "MixinEntityPlayerSP",
     "MixinFontRenderer",

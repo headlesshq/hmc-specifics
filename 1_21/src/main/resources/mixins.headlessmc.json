@@ -20,7 +20,7 @@
     "maxShiftBy": 10
   },
   "client": [
-    "AbstractContainerScreenAccessor",
+    "IAbstractContainerScreen",
     "MixinChatComponent"
   ]
 }

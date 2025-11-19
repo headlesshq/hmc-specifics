@@ -12,7 +12,6 @@ import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -93,7 +92,7 @@ public abstract class MixinScreen implements GuiScreen, GuiEventListener {
                 //noinspection ConstantValue
                 if (AbstractContainerScreen.class.isInstance(this)) {
                     AbstractContainerScreen<?> acs = AbstractContainerScreen.class.cast(this);
-                    AbstractContainerScreenAccessor accessor = (AbstractContainerScreenAccessor) acs;
+                    IAbstractContainerScreen accessor = (IAbstractContainerScreen) acs;
                     xOffset = (acs.width - accessor.getImageWidth()) / 2;
                     yOffset = (acs.height - accessor.getImageHeight()) / 2;
                 }

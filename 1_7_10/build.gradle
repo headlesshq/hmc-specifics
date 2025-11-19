@@ -120,6 +120,7 @@ dependencies {
     }
     jarLibs 'com.github.ImpactDevelopment:SimpleTweaker:1.2'
     jarLibs('org.spongepowered:mixin:0.7.11-SNAPSHOT') {
+        // these dependencies and asm prevent us from going to a newer Mixin version on these old Minecraft versions
         exclude module: 'launchwrapper'
         exclude module: 'guava'
         exclude module: 'gson'

@@ -69,8 +69,10 @@ public abstract class MixinGuiScreen implements GuiScreen {
                     text = ComponentHelper.toAnsiString(stack.getTextComponent());
                 }
 
-                int xOffset = (guiContainer.width - 176) / 2;
-                int yOffset = (guiContainer.height - 166) / 2;
+                //noinspection RedundantClassCall
+                IGuiContainer acs = IGuiContainer.class.cast(this);
+                int xOffset = (guiContainer.width - acs.getXSize()) / 2;
+                int yOffset = (guiContainer.height - acs.getYSize()) / 2;
 
                 List<String> tooltip = hmc$getItemToolTip(stack);
                 result.add(new me.earth.headlessmc.mc.gui.Slot(

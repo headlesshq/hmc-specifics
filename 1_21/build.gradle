@@ -163,7 +163,7 @@ for (String platform_capitalized : ['Fabric', 'Neoforge', 'Lexforge']) {
 }
 
 dependencies {
-    compileOnly 'org.spongepowered:mixin:0.8.5-SNAPSHOT'
+    compileOnly 'org.spongepowered:mixin:0.8.5'
     lwjglAgent "me.earth.headlessmc:headlessmc-lwjgl:${project(':hmc-specifics-api').headlessmc_version}"
     implementation ('net.minecraft:launchwrapper:1.12') {
         exclude module: 'log4j-api'

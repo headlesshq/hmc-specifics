@@ -1,6 +1,7 @@
 package me.earth.headlessmc.mc.mixins;
 
 import me.earth.headlessmc.mc.ComponentHelper;
+import me.earth.headlessmc.mc.GuiScreenMixinWorkaround;
 import me.earth.headlessmc.mc.ReflectionHelper;
 import me.earth.headlessmc.mc.gui.GuiButton;
 import me.earth.headlessmc.mc.gui.GuiElement;
@@ -68,8 +69,9 @@ public abstract class MixinGuiScreen implements GuiScreen {
                     text = ComponentHelper.toAnsiString(stack.getChatComponent());
                 }
 
-                int xOffset = (guiContainer.width - 176) / 2;
-                int yOffset = (guiContainer.height - 166) / 2;
+                int[] xyOffset = GuiScreenMixinWorkaround.getXYOffset(guiContainer);
+                int xOffset = xyOffset[0];
+                int yOffset = xyOffset[1];
 
                 List<String> tooltip = hmc$getItemToolTip(stack);
                 result.add(new me.earth.headlessmc.mc.gui.Slot(
