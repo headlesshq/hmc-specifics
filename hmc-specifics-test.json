@@ -3,12 +3,26 @@
   "steps": [
     {
       "type": "ENDS_WITH",
-      "message": "Loading HMC-Specifics!"
+      "message": "HMC-Specifics initialized!",
+      "timeout": 600
+    },
+    {
+      "type": "SEND",
+      "message": "help",
+      "timeout": 120
     },
     {
       "type": "SEND",
       "message": "quit",
       "timeout": 120
+    },
+    {
+      "type": "ENDS_WITH",
+      "message": "Quitting Minecraft...",
+      "timeout": 60
+    },
+    {
+      "type": "SUCCESS"
     }
   ]
 }

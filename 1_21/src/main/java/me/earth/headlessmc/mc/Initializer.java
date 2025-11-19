@@ -19,6 +19,7 @@ public class Initializer {
 
         SpecificsInitializer initializer = new SpecificsInitializer(mc);
         initializer.init(ConfigImpl.empty());
+        LOGGER.info("HMC-Specifics initialized!");
     }
 
 }
