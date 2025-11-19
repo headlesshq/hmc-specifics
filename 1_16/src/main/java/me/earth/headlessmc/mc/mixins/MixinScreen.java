@@ -92,8 +92,9 @@ public abstract class MixinScreen implements GuiScreen, GuiEventListener {
                 //noinspection ConstantValue
                 if (AbstractContainerScreen.class.isInstance(this)) {
                     AbstractContainerScreen<?> acs = AbstractContainerScreen.class.cast(this);
-                    xOffset = (acs.width - 176) / 2; // imageWidth // leftPos
-                    yOffset = (acs.height - 166) / 2; // imageHeight // topPos
+                    IAbstractContainerScreen accessor = (IAbstractContainerScreen) acs;
+                    xOffset = (acs.width - accessor.getImageWidth()) / 2;
+                    yOffset = (acs.height - accessor.getImageHeight()) / 2;
                 }
 
                 List<String> tooltip = hmc$GetTooltip(stack);

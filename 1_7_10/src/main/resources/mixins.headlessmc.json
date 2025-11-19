@@ -5,6 +5,7 @@
   "refmap": "mixins.headlessmc.refmap.json",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "IGuiContainer",
     "MixinEntityClientPlayerMP",
     "MixinFontRenderer",
     "MixinGuiButton",
