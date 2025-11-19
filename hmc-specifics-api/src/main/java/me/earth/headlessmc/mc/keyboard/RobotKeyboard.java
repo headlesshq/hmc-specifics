@@ -11,9 +11,9 @@ import java.util.Iterator;
 import java.util.List;
 
 // seems like on new mc versions java.awt.headless=true, it's set in the main class, see 1.21.5 main
-public class RobotKeyboard implements Keyboard {
+public class RobotKeyboard extends AbstractKeyboard implements Keyboard {
     @Override
-    public void press(Key key) {
+    public void performKeyPress(Key key) {
         try {
             Robot robot = new Robot();
             robot.keyPress(key.getId());
@@ -23,7 +23,7 @@ public class RobotKeyboard implements Keyboard {
     }
 
     @Override
-    public void release(Key key) {
+    public void performKeyRelease(Key key) {
         try {
             Robot robot = new Robot();
             robot.keyRelease(key.getId());

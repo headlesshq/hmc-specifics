@@ -41,3 +41,6 @@ replay_*.log
 /libs/
 /logs/
 /.architectury-transformer/
+
+/HeadlessMC
+headlessmc-launcher-*.jar
