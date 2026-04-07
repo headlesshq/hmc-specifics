@@ -172,7 +172,7 @@ public abstract class MixinMinecraft extends MixinBlockableEventLoop
         if (player != null && player.connection != null && player.connection.getCommands() != null) {
             CommandDispatcher<ClientSuggestionProvider> dispatcher = player.connection.getCommands();
             ClientSuggestionProvider suggestionsProvider = player.connection.getSuggestionsProvider();
-            Collection<String> customTabSugggestions = suggestionsProvider.getCustomTabSugggestions();
+            Collection<String> customTabSugggestions = suggestionsProvider.getCustomTabSuggestions();
             BiFunction<Collection<String>, SuggestionsBuilder, CompletableFuture<Suggestions>> suggestFunction = SharedSuggestionProvider::suggest;
             return BrigadierWrapper.getCompletions(dispatcher, suggestionsProvider, customTabSugggestions, suggestFunction, line);
         }

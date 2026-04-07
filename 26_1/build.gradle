@@ -1,7 +1,7 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
-    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'com.gradleup.shadow' version '9.4.1'
     id 'java'
     id 'maven-publish'
     id 'xyz.wagyourtail.unimined' version '1.4.2-SNAPSHOT'
@@ -143,12 +143,12 @@ for (String platform_capitalized : ['Fabric', 'Neoforge', 'Lexforge']) {
         dependsOn(remapJarTask)
         it.group = 'build'
         it.archiveClassifier = "${platform}-release"
-        from remapJarTask.outputs
+        from { zipTree(remapJarTask.archiveFile.get().asFile) }
         it.excludes += '**module-info.class'
-        it.configurations += [ project.configurations.jarLibs ]
+        it.configurations.add(project.configurations.jarLibs)
         if ('fabricShadowJar' != it.name) {
             if ('lexforgeShadowJar' != it.name) { // on 1.20.6 and 1.21 lexforge ships jline 3.12.1-jna
-                it.configurations += [ project.configurations.forgeJarLibs ]
+                it.configurations.add(project.configurations.forgeJarLibs)
             }
 
             it.dependencies {
@@ -160,7 +160,7 @@ for (String platform_capitalized : ['Fabric', 'Neoforge', 'Lexforge']) {
                 exclude(dependency('org.slf4j:slf4j-api:.*'))
             }
         } else {
-            it.configurations += [ project.configurations.fabricJarLibs ]
+            it.configurations.add(project.configurations.fabricJarLibs)
         }
     }
 
@@ -201,9 +201,9 @@ tasks.register("runnableFabricShadowJar", ShadowJar) {
     dependsOn(fabricJar)
     it.group = 'build'
     it.archiveClassifier = "fabric-dev-run-client"
-    from fabricJar.outputs
+    from { zipTree(fabricJar.archiveFile.get().asFile) }
     it.excludes += '**module-info.class'
-    it.configurations += [ project.configurations.jarLibs ]
+    it.configurations.add(project.configurations.jarLibs)
     // Mixin is signed
     exclude 'META-INF/*.RSA'
     exclude 'META-INF/*.SF'
@@ -280,7 +280,7 @@ tasks.withType(org.gradle.jvm.tasks.Jar).configureEach {
     exclude '**module-info.class'
     from("LICENSE") {
         duplicatesStrategy = DuplicatesStrategy.INCLUDE
-        rename { "${it}_${project.archivesBaseName}" }
+        rename { "${it}_${base.archivesName.get()}" }
     }
 
     manifest {
@@ -299,7 +299,7 @@ afterEvaluate {
         publications {
             "${name.toLowerCase()}"(MavenPublication) {
                 ((MavenPublication) it).groupId "${group}"
-                ((MavenPublication) it).artifactId "${archivesBaseName.toLowerCase()}"
+                ((MavenPublication) it).artifactId "${base.archivesName.get().toLowerCase()}"
                 ((MavenPublication) it).version "${version}"
                 from components.java
                 for (String platform: ['Fabric', 'Lexforge', 'Neoforge']) {
