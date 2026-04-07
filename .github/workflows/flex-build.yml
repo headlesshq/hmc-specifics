@@ -47,7 +47,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ inputs.dir }}/build
-          key: build-${{ inputs.mc }}-${{ hashFiles(format('{0}/[a-z]**', inputs.dir), 'api/**') }}
+          key: build-${{ inputs.mc }}-${{ hashFiles(format('{0}/[a-z]**', inputs.dir), 'hmc-specifics-api/**') }}
 
       - if: steps.cache.outputs.cache-hit != 'true'
         name: Setup Java
