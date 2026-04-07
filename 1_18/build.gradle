@@ -120,6 +120,7 @@ for (String platform_capitalized : ['Fabric', 'Lexforge']) {
         it.archiveClassifier = "${platform}-release"
         from remapJarTask.outputs
         it.excludes += '**module-info.class'
+        it.excludes += '**META-INF/**/**module-info.class'
         it.configurations += [ project.configurations.jarLibs ]
         if ('fabricShadowJar' != it.name) {
             it.configurations += [ project.configurations.forgeJarLibs ]
