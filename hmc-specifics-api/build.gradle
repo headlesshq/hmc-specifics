@@ -41,8 +41,12 @@ repositories {
     }
 }
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
+try {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+} catch (ignored) { // gradle 9
+
+}
 
 compileJava {
     if (JavaVersion.current().ordinal() > JavaVersion.VERSION_1_8.ordinal()) {
@@ -86,6 +90,7 @@ dependencies {
     implementation 'org.jline:jline:3.26.3'
 
     testImplementation("me.earth.headlessmc:headlessmc-api:${headlessmc_version}:test-fixtures")
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.9.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
     testImplementation 'com.mojang:brigadier:1.0.17' // old version for testing
@@ -100,7 +105,7 @@ publishing {
     publications {
         "$project.name"(MavenPublication) {
             ((MavenPublication) it).groupId "${project.group}"
-            ((MavenPublication) it).artifactId "${project.archivesBaseName.toLowerCase()}"
+            ((MavenPublication) it).artifactId "hmc-specifics-api"
             ((MavenPublication) it).version "${project.version}"
             //noinspection GroovyAssignabilityCheck
             from components.java

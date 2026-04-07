@@ -139,7 +139,7 @@ for (String platform_capitalized : ['Fabric', 'Neoforge', 'Lexforge']) {
         it.group = 'build'
         it.archiveClassifier = "${platform}-release"
         from remapJarTask.outputs
-        it.excludes += '**module-info.class'
+        it.excludes += '**META-INF/**/**module-info.class'
         it.configurations += [ project.configurations.jarLibs ]
         if ('fabricShadowJar' != it.name) {
             if ('lexforgeShadowJar' != it.name) { // on 1.20.6 and 1.21 lexforge ships jline 3.12.1-jna
@@ -198,6 +198,7 @@ tasks.register("runnableFabricShadowJar", ShadowJar) {
     it.archiveClassifier = "fabric-dev-run-client"
     from fabricJar.outputs
     it.excludes += '**module-info.class'
+    it.excludes += '**META-INF/**/**module-info.class'
     it.configurations += [ project.configurations.jarLibs ]
     // Mixin is signed
     exclude 'META-INF/*.RSA'

@@ -13,7 +13,7 @@ name: Lifecycle
   workflow_dispatch:
     inputs:
       dirs:
-        description: Comma-delimited directories to build and run (i.e. api,1_20,1_21 )
+        description: Comma-delimited directories to build and run (i.e. hmc-specifics-api,1_20,1_21 )
         default: "all"
       ref:
         description: Git ref to checkout before build (i.e. my-feature-branch )
