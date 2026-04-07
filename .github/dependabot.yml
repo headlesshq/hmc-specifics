@@ -19,3 +19,7 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
+    groups:
+      python-dependencies:
+        patterns:
+          - "*"
