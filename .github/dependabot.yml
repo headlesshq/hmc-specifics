@@ -1,0 +1,21 @@
+version: 2
+
+updates:
+  - package-ecosystem: "pip"
+    directory: "/new-versions"
+    schedule:
+      interval: "daily"
+      time: "18:00"
+      timezone: "Europe/Berlin"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "okafke"
+    assignees:
+      - "okafke"
+    commit-message:
+      prefix: "chore(ci)"
+    labels:
+      - "dependencies"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]

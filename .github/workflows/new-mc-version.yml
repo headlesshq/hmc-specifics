@@ -3,6 +3,9 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "0 0 * * *"
+  pull_request:
+    paths:
+      - "new-versions/**"
 
 jobs:
   check-for-new-mc-version:
@@ -38,7 +41,7 @@ jobs:
           fi
 
       - name: Create Pull Request
-        if: steps.git-check.outputs.changes == 'true' && env.LATEST_VERSION != ''
+        if: steps.git-check.outputs.changes == 'true' && env.LATEST_VERSION != '' && github.event_name != 'pull_request'
         uses: peter-evans/create-pull-request@v7
         with:
           # TODO: check if this works from the cron job, but it does not work from workflow_dispatch
