@@ -58,7 +58,7 @@ def modify_gradle_properties(content: str, latest: str, lex: str) -> str:
     return content
 
 
-def update_ci_data(curr_dir: str, latest: str, lex: str):
+def update_ci_data(curr_dir: str, latest: str, lex: str, java: str):
     with open('ci-data.json', "r") as f:
         ci_data = json.load(f)
 
@@ -70,7 +70,7 @@ def update_ci_data(curr_dir: str, latest: str, lex: str):
       "mc": latest,
       "lex": lex,
       "neo": "0-beta",
-      "java": "21"
+      "java": java
     })
 
     for ml_type, modloader in { "fabric": "fabric", "neoforge": "neoforge", "lexforge": "forge" }.items():
@@ -79,7 +79,7 @@ def update_ci_data(curr_dir: str, latest: str, lex: str):
             "type": ml_type,
             "modloader": modloader,
             "regex": f".*{modloader}.*",
-            "java": "21"
+            "java": java
         })
 
     with open('ci-data.json', "w") as f:
@@ -139,7 +139,7 @@ def get_lexforge_version(mc_version: str) -> str:
 
 
 def check_latest_mc_version():
-    current_version_file_path = Path(__file__).parent / 'current-version.json'
+    current_version_file_path = Path(__file__).parent.parent / 'current-version.json'
     with open(current_version_file_path) as f:
         current_version = json.load(f)
 
@@ -147,6 +147,7 @@ def check_latest_mc_version():
     current_minor = current_version['minor']
     current_patch = current_version['patch']
     curr_dir = current_version['dir']
+    current_java = current_version['java']
 
     current_version_name = f"{current_major}.{current_minor}" if current_patch == 0 \
         else f"{current_major}.{current_minor}.{current_patch}"
@@ -174,7 +175,7 @@ def check_latest_mc_version():
             if current_major != major or current_minor != minor:
                 curr_dir = prepare_new_dir(curr_dir, latest_release, major, minor, patch, lex)
             update_current_version_json(current_version_file_path, current_version.copy(), curr_dir, major, minor, patch)
-            update_ci_data(curr_dir, latest_release, lex)
+            update_ci_data(curr_dir, latest_release, lex, current_java)
             modify_readme(current_version_name, latest_release, current_major, major, current_minor, minor)
             with open(env_file, 'a') as f:
                 f.write(f"LATEST_VERSION={latest_release}\n")
