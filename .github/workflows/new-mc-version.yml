@@ -47,6 +47,7 @@ jobs:
           # TODO: check if this works from the cron job, but it does not work from workflow_dispatch
           author: 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
           assignees: okafke
+          token: ${{ secrets.PR_TOKEN }}
           #reviewers: okafke
           commit-message: "feat: ${{ env.LATEST_VERSION }}"
           delete-branch: true
