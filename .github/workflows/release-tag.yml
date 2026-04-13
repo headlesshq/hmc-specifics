@@ -10,11 +10,18 @@ jobs:
     outputs:
       build-matrix: ${{ steps.matrices.outputs.build-matrix }}
       release-matrix: ${{ steps.matrices.outputs.release-matrix }}
+      version: ${{ steps.version.outputs.version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
+
+      - name: Read version
+        id: version
+        run: |
+          VERSION=$(jq -r '."."' .release-please-manifest.json)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - id: matrices
         name: Construct matrices
@@ -72,17 +79,6 @@ jobs:
         ${{ insert }}: ${{ fromJSON(needs.matrices.outputs.release-matrix) }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-
-      - name: Read version
-        id: version
-        run: |
-          VERSION=$(jq -r '."."' .release-please-manifest.json)
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
@@ -102,6 +98,7 @@ jobs:
 
       - name: Create or update tag
         run: |
+          git init
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
@@ -115,7 +112,7 @@ jobs:
           tag_name: ${{ matrix.mc }}-latest
           name: ${{ matrix.mc }}-latest
           prerelease: true
-          body: Version ${{ steps.version.outputs.version }}
+          body: Version ${{ needs.matrices.outputs.version }}
           files: out/*
           fail_on_unmatched_files: false
         env:
