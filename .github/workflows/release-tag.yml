@@ -13,6 +13,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
       - id: matrices
         name: Construct matrices
@@ -70,6 +72,19 @@ jobs:
         ${{ insert }}: ${{ fromJSON(needs.matrices.outputs.release-matrix) }}
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          sparse-checkout: |
+            .release-please-manifest.json
+
+      - name: Read version
+        id: version
+        run: |
+          VERSION=$(jq -r '."."' .release-please-manifest.json)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
@@ -103,6 +118,7 @@ jobs:
           tag_name: ${{ matrix.mc }}-latest
           name: ${{ matrix.mc }}-latest
           prerelease: true
+          body: Version ${{ steps.version.outputs.version }}
           files: out/*
           fail_on_unmatched_files: false
         env:
