@@ -1,0 +1,109 @@
+name: Release Tags
+
+on:
+  workflow_dispatch:
+
+jobs:
+  matrices:
+    name: Construct matrices
+    runs-on: ubuntu-latest
+    outputs:
+      build-matrix: ${{ steps.matrices.outputs.build-matrix }}
+      release-matrix: ${{ steps.matrices.outputs.release-matrix }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - id: matrices
+        name: Construct matrices
+        run: |
+          import json
+          import os
+
+          with open('ci-data.json') as f:
+              ci_data = json.load(f)
+
+          build_data = ci_data['build_data']
+          run_data = ci_data['run_data']
+
+          build_matrix = {"include": build_data}
+
+          seen = set()
+          release_versions = []
+          for item in run_data:
+              mc = item["mc"]
+              if mc not in seen:
+                  seen.add(mc)
+                  release_versions.append({"mc": mc})
+
+          release_matrix = {"include": release_versions}
+
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
+              fh.write(f'build-matrix={json.dumps(build_matrix)}\n')
+              fh.write(f'release-matrix={json.dumps(release_matrix)}\n')
+        shell: python {0}
+
+  build:
+    name: Build
+    needs: matrices
+    strategy:
+      fail-fast: false
+      matrix:
+        ${{ insert }}: ${{ fromJSON(needs.matrices.outputs.build-matrix) }}
+    uses: ./.github/workflows/flex-build.yml
+    with:
+      dir: ${{ matrix.dir }}
+      mc: ${{ matrix.mc }}
+      lex: ${{ matrix.lex }}
+      neo: ${{ matrix.neo }}
+      java: ${{ matrix.java }}
+
+  release:
+    name: Latest Pre-Releases
+    needs:
+      - matrices
+      - build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ${{ insert }}: ${{ fromJSON(needs.matrices.outputs.release-matrix) }}
+
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: jars-${{ matrix.mc }}
+          path: jars
+          merge-multiple: true
+
+      - name: Prepare assets
+        run: |
+          mkdir -p out
+          for modloader in fabric forge neoforge; do
+            file=$(find jars -type f -name "*${modloader}*release.jar" | head -n 1)
+            if [ -f "$file" ]; then
+              cp "$file" "out/hmc-specifics-${{ matrix.mc }}-${modloader}-latest.jar"
+            fi
+          done
+
+      - name: Create or update tag
+        run: |
+          git init
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+          git fetch origin
+          git tag -f ${{ matrix.mc }}-latest ${{ github.sha }}
+          git push origin ${{ matrix.mc }}-latest --force
+
+      - name: Create or update release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ matrix.mc }}-latest
+          name: ${{ matrix.mc }}-latest
+          prerelease: true
+          files: out/*
+          fail_on_unmatched_files: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
