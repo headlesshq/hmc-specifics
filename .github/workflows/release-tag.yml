@@ -2,6 +2,9 @@ name: Release Tags
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
   matrices:
@@ -112,7 +115,7 @@ jobs:
           tag_name: ${{ matrix.mc }}-latest
           name: ${{ matrix.mc }}-latest
           prerelease: true
-          body: Version ${{ needs.matrices.outputs.version }}
+          body: "Version [${{ needs.matrices.outputs.version }}](https://github.com/headlesshq/hmc-specifics/releases/tag/${{ needs.matrices.outputs.version }})"
           files: out/*
           fail_on_unmatched_files: false
         env:
