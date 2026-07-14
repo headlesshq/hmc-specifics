@@ -20,7 +20,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.main.GameConfig;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.multiplayer.ServerAddress;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.language.I18n;
@@ -99,13 +98,12 @@ public abstract class MixinMinecraft extends MixinBlockableEventLoop implements 
     @Override
     public void connect(String ip, int port) {
         this.disconnect();
-        ServerAddress address = ServerAddress.parseString(ip + ":" + port);
         setScreen(
             new ConnectScreen(
                 new TitleScreen(),
                 net.minecraft.client.Minecraft.class.cast(this),
                 new ServerData(
-                    I18n.get("selectServer.defaultName"), address.toString(), false)));
+                    I18n.get("selectServer.defaultName"), ip + ":" + port, false)));
     }
 
     @Override
