@@ -38,29 +38,29 @@ public abstract class MixinLocalPlayer implements Player {
 
     @Override
     public void openMenu() {
-        if (Minecraft.getInstance().screen != null) {
-            Minecraft.getInstance().screen.onClose();
+        if (Minecraft.getInstance().gui.screen() != null) {
+            Minecraft.getInstance().gui.screen().onClose();
         }
         Minecraft.getInstance().pauseGame(false);
     }
 
     @Override
     public void openInventory() {
-        if (Minecraft.getInstance().screen != null) {
-            Minecraft.getInstance().screen.onClose();
+        if (Minecraft.getInstance().gui.screen() != null) {
+            Minecraft.getInstance().gui.screen().onClose();
         }
         if (Minecraft.getInstance().gameMode != null
             && Minecraft.getInstance().gameMode.isServerControlledInventory()) {
             LocalPlayer.class.cast(this).sendOpenInventory();
         } else {
-            Minecraft.getInstance().setScreen(new InventoryScreen(LocalPlayer.class.cast(this)));
+            Minecraft.getInstance().gui.setScreen(new InventoryScreen(LocalPlayer.class.cast(this)));
         }
     }
 
     @Override
     public void closeScreen() {
-        if (Minecraft.getInstance().screen != null) {
-            Minecraft.getInstance().screen.onClose();
+        if (Minecraft.getInstance().gui.screen() != null) {
+            Minecraft.getInstance().gui.screen().onClose();
         }
     }
 
