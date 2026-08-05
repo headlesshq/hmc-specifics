@@ -13,7 +13,7 @@ public abstract class MixinAbstractWidget implements GuiElement {
     @Shadow
     public boolean active;
     @Shadow
-    private Component message;
+    protected Component message;
     private Integer id;
 
     @Override

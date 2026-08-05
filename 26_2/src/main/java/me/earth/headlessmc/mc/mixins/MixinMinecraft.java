@@ -15,6 +15,7 @@ import me.earth.headlessmc.mc.gui.GuiScreen;
 import me.earth.headlessmc.mc.keyboard.Keyboard;
 import me.earth.headlessmc.mc.player.Player;
 import net.minecraft.client.User;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.GenericMessageScreen;
 import net.minecraft.client.gui.screens.Screen;
@@ -51,18 +52,17 @@ public abstract class MixinMinecraft extends MixinBlockableEventLoop
     @Shadow
     public LocalPlayer player;
     @Shadow
-    public Screen screen;
-    @Shadow
     public ClientLevel level;
     @Shadow
     @Final
     @Mutable
     private User user;
+    @Final
+    @Shadow
+    public Gui gui;
 
     @Shadow
     public abstract void stop();
-    @Shadow
-    public abstract void setScreen(Screen arg);
     @Shadow
     public abstract boolean isLocalServer();
     @Shadow
@@ -86,7 +86,7 @@ public abstract class MixinMinecraft extends MixinBlockableEventLoop
 
     @Override
     public GuiScreen getScreen() {
-        return (GuiScreen) screen;
+        return (GuiScreen) gui.screen();
     }
 
     @Override
@@ -113,11 +113,11 @@ public abstract class MixinMinecraft extends MixinBlockableEventLoop
 
         TitleScreen titleScreen = new TitleScreen();
         if (localServer) {
-            setScreen(titleScreen);
+            gui.setScreen(titleScreen);
         } else if (serverData != null && serverData.isRealm()) {
-            setScreen(new RealmsMainScreen(titleScreen));
+            gui.setScreen(new RealmsMainScreen(titleScreen));
         } else {
-            setScreen(new JoinMultiplayerScreen(titleScreen));
+            gui.setScreen(new JoinMultiplayerScreen(titleScreen));
         }
     }
 
@@ -151,7 +151,7 @@ public abstract class MixinMinecraft extends MixinBlockableEventLoop
                 Component.translatable("multiplayer.disconnect.generic")));
         }
 
-        this.setScreen(new TitleScreen());
+        gui.setScreen(new TitleScreen());
     }
 
     @Override
