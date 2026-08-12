@@ -15,6 +15,7 @@ import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.gui.GuiMultiplayer;
 import net.minecraft.client.multiplayer.GuiConnecting;
+import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.util.Session;
 import org.spongepowered.asm.mixin.Final;
@@ -96,11 +97,23 @@ public abstract class MixinMinecraft implements Minecraft {
     @Override
     public void connect(String ip, int port) {
         this.disconnect();
-        this.displayGuiScreen(
-            new GuiConnecting(new GuiMainMenu(),
-                              net.minecraft.client.Minecraft.class.cast(this),
-                              ip,
-                              port));
+        GuiMainMenu menu = new GuiMainMenu();
+        // On Forge, route the join through FMLClientHandler.connectToServer: it shows the same
+        // connecting screen AND initializes FMLClientHandler.playClientBlock - the latch the FML
+        // mod-list handshake awaits after login. A hand-built GuiConnecting leaves that latch null,
+        // so the handshake NPEs in waitForPlayClient() right after S02PacketLoginSuccess. Forge is
+        // not on this shared source set's compile classpath (only the vanilla client is), so call it
+        // reflectively; fall back to the vanilla connect when off Forge (e.g. Fabric).
+        try {
+            Class<?> fml = Class.forName("cpw.mods.fml.client.FMLClientHandler");
+            Class<?> guiScreen = Class.forName("net.minecraft.client.gui.GuiScreen");
+            Object handler = fml.getMethod("instance").invoke(null);
+            fml.getMethod("connectToServer", guiScreen, ServerData.class)
+               .invoke(handler, menu, new ServerData("headlessmc", ip + ":" + port));
+        } catch (Throwable t) {
+            this.displayGuiScreen(new GuiConnecting(
+                menu, net.minecraft.client.Minecraft.class.cast(this), ip, port));
+        }
     }
 
     @Override
