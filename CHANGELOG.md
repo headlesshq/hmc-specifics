@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.5.0](https://github.com/headlesshq/hmc-specifics/compare/2.4.0...2.5.0) (2026-08-12)
+
+
+### Features
+
+* 26.1.2 ([#53](https://github.com/headlesshq/hmc-specifics/issues/53)) ([db0f519](https://github.com/headlesshq/hmc-specifics/commit/db0f5193b2ef2fdff8657a2fa5d2580ff50cf267))
+* 26.2 ([#60](https://github.com/headlesshq/hmc-specifics/issues/60)) ([bd0373f](https://github.com/headlesshq/hmc-specifics/commit/bd0373f4751fd977a337943ee31f7a735aa00bbb))
+
 ## [2.4.0](https://github.com/headlesshq/hmc-specifics/compare/2.3.0...2.4.0) (2026-04-07)
 
 
