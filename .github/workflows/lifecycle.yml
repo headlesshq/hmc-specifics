@@ -343,36 +343,51 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.PR_TOKEN }}
         with:
-          claude_code_oauth_token: ${{ secrets.CLAUDE_TOKEN }}
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ secrets.PR_TOKEN }}
+          plugin_marketplaces: https://github.com/headlesshq/headlessmc-skill.git
+          plugins: headlessmc@headlesshq
           claude_args: >-
-            --max-turns 80
-            --allowedTools "Bash,Read,Edit,Write,Glob,Grep,WebFetch"
+            --max-turns 120                                                                                                                                                                                                                                                                                       
+            --allowedTools "Bash,Read,Edit,Write,Glob,Grep,WebFetch,Skill"
           prompt: |
-            Pull request #${{ github.event.pull_request.number }} on branch `${{ github.head_ref }}`
-            was opened automatically by mc-update-helper to add support for a new Minecraft version.
-            It copied the project directory of the previous version and bumped versions in
-            gradle.properties, fabric.mod.json, mods.toml, ci-data.json and the README.
-
-            The CI run failed:
-            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-            - build: ${{ needs.build.result }}
-            - run (runtime tests): ${{ needs.run.result }}
-
-            Steps:
-            1. Read the logs of the failed jobs with
-               `gh run view ${{ github.run_id }} --log-failed`.
-            2. Find the cause. Typical causes: Minecraft API/mapping changes, loader
-               versions (Fabric loader/API, NeoForge, Forge) that don't exist yet or are
-               wrong in gradle.properties, or a wrong Java version in ci-data.json.
-            3. Fix only the directory of the new version (and ci-data.json/README if
-               needed). Do not modify directories of other Minecraft versions.
-            4. Verify with `./gradlew build` inside that directory (if it has its own
-               Gradle wrapper, use it) until it compiles.
-            5. Commit with a message like `fix: <short description>` and push to
-               `${{ github.head_ref }}`.
-
-            If you cannot fix it (e.g. a loader has no release for this version yet),
-            don't push anything. Instead, comment on the PR with
-            `gh pr comment ${{ github.event.pull_request.number }} --body "..."`,
-            explaining what fails and what is needed.
+            Pull request #${{ github.event.pull_request.number }} on branch `${{ github.head_ref }}`                                                                                                                                                                                                              
+              was opened automatically by mc-update-helper to add support for a new Minecraft version.                                                                                                                                                                                                              
+              It copied the project directory of the previous version and bumped versions in                                                                                                                                                                                                                        
+              gradle.properties, fabric.mod.json, mods.toml, ci-data.json and the README.                                                                                                                                                                                                                           
+            
+              The CI run failed:                                                                                                                                                                                                                                                                                    
+              ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}                                                                                                                                                                                                                   
+              - build: ${{ needs.build.result }}                                                                                                                                                                                                                                                                    
+              - run (runtime tests): ${{ needs.run.result }}                                                                                                                                                                                                                                                        
+            
+              You have the `headlessmc` skill. Use it to install HeadlessMc and to launch                                                                                                                                                                                                                           
+              Minecraft headlessly with mod loaders (including MC-Runtime-Test for CI checks).                                                                                                                                                                                                                      
+            
+              Steps:                                                                                                                                                                                                                                                                                                
+              1. Read the logs of the failed jobs with                                                                                                                                                                                                                                                              
+                 `gh run view ${{ github.run_id }} --log-failed`.                                                                                                                                                                                                                                                   
+              2. Find the cause. Typical causes: Minecraft API/mapping changes, loader                                                                                                                                                                                                                              
+                 versions (Fabric loader/API, NeoForge, Forge) that don't exist yet or are                                                                                                                                                                                                                          
+                 wrong in gradle.properties, a wrong Java version in ci-data.json, or                                                                                                                                                                                                                               
+                 crashes on startup.                                                                                                                                                                                                                                                                                
+              3. Fix only the directory of the new version (and ci-data.json/README if                                                                                                                                                                                                                              
+                 needed). Do not modify directories of other Minecraft versions.                                                                                                                                                                                                                                    
+              4. Verify that it builds with `./gradlew build` inside that directory (if it                                                                                                                                                                                                                          
+                 has its own Gradle wrapper, use it).                                                                                                                                                                                                                                                               
+              5. Verify that the mod launches: for every mod loader the new version is                                                                                                                                                                                                                              
+                 built and tested for (see the build_data/run_data entries for it in                                                                                                                                                                                                                                
+                 ci-data.json), use the headlessmc skill to launch Minecraft headlessly                                                                                                                                                                                                                             
+                 with an offline account, that loader, the built mod jar and MC-Runtime-Test,                                                                                                                                                                                                                       
+                 and check that the game starts, loads into a world and exits without a                                                                                                                                                                                                                             
+                 crash. If it crashes, read the crash report/log, fix the cause and repeat.                                                                                                                                                                                                                         
+              6. Commit with a message like `fix: <short description>` and push to                                                                                                                                                                                                                                  
+                 `${{ github.head_ref }}`. In the commit message, list which loaders                                                                                                                                                                                                                                
+                 you verified launch successfully.                                                                                                                                                                                                                                                                  
+            
+              If you cannot fix it (e.g. a loader has no release for this version yet),                                                                                                                                                                                                                             
+              don't push anything. Instead, comment on the PR with                                                                                                                                                                                                                                                  
+              `gh pr comment ${{ github.event.pull_request.number }} --body "..."`,                                                                                                                                                                                                                                 
+              explaining what fails, which loaders you tested and what is needed.                                                                                                                                                                                                                                   
+              If a fix compiles but you could not get a launch to succeed for some loader,                                                                                                                                                                                                                          
+              push the fix and comment on the PR which loaders still fail and why.
