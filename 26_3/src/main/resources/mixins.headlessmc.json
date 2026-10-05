@@ -1,0 +1,27 @@
+{
+  "required": true,
+  "package": "me.earth.headlessmc.mc.mixins",
+  "refmap": "mixins.headlessmc.refmap.json",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "IBootstrap",
+    "IInputConstantsKey",
+    "MixinAbstractWidget",
+    "MixinBlockableEventLoop",
+    "MixinButton",
+    "MixinEditBox",
+    "MixinFont",
+    "MixinInputConstants",
+    "MixinLocalPlayer",
+    "MixinMinecraft",
+    "MixinScreen"
+  ],
+  "injectors": {
+    "maxShiftBy": 10
+  },
+  "client": [
+    "AbstractContainerScreenAccessor",
+    "IKeyboardHandler",
+    "MixinChatComponent"
+  ]
+}
