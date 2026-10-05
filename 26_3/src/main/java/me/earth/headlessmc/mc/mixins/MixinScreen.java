@@ -1,5 +1,6 @@
 package me.earth.headlessmc.mc.mixins;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import me.earth.headlessmc.mc.ComponentHelper;
 import me.earth.headlessmc.mc.IdManager;
 import me.earth.headlessmc.mc.ReflectionHelper;
@@ -23,6 +24,7 @@ import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -45,9 +47,21 @@ public abstract class MixinScreen implements GuiScreen, GuiEventListener {
 
     @Override
     public void click(int x, int y, int button) {
+        int sdlButton = toSdlButton(button);
         mouseMoved(x, y);
-        mouseClicked(new MouseButtonEvent(x, y, new MouseButtonInfo(button, 0)), false);
-        mouseReleased(new MouseButtonEvent(x, y, new MouseButtonInfo(button, 0)));
+        mouseClicked(new MouseButtonEvent(x, y, new MouseButtonInfo(sdlButton, 0)), false);
+        mouseReleased(new MouseButtonEvent(x, y, new MouseButtonInfo(sdlButton, 0)));
+    }
+
+    // the click command uses GLFW button ids (0 = left, 1 = right, 2 = middle), 26.3 uses SDL (1 = left, 2 = middle, 3 = right)
+    @Unique
+    private static int toSdlButton(int glfwButton) {
+        return switch (glfwButton) {
+            case 0 -> InputConstants.MOUSE_BUTTON_LEFT;
+            case 1 -> InputConstants.MOUSE_BUTTON_RIGHT;
+            case 2 -> InputConstants.MOUSE_BUTTON_MIDDLE;
+            default -> glfwButton + 1;
+        };
     }
 
     @Override

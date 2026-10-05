@@ -9,7 +9,6 @@ import me.earth.headlessmc.mc.mixins.IKeyboardHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.input.KeyEvent;
 import org.jetbrains.annotations.NotNull;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.Iterator;
 
@@ -24,7 +23,7 @@ public class KeyboardImpl extends AbstractKeyboard implements Keyboard {
     public void performKeyPress(Key key) {
         ((IKeyboardHandler) mc.keyboardHandler).keyPress(
                 mc.getWindow().handle(),
-                GLFW.GLFW_PRESS,
+                InputConstants.PRESS,
                 new KeyEvent(key.getId(), key.getScanCode(), 0)
         );
     }
@@ -33,7 +32,7 @@ public class KeyboardImpl extends AbstractKeyboard implements Keyboard {
     public void performKeyRelease(Key key) {
         ((IKeyboardHandler) mc.keyboardHandler).keyPress(
                 mc.getWindow().handle(),
-                GLFW.GLFW_RELEASE,
+                InputConstants.RELEASE,
                 new KeyEvent(key.getId(), key.getScanCode(), 0)
         );
     }
@@ -44,10 +43,7 @@ public class KeyboardImpl extends AbstractKeyboard implements Keyboard {
                 .getNAME_MAP()
                 .values()
                 .stream()
-                .map(k -> Key.createFromMinecraftName(
-                        k.getName(),
-                        k.getType() == InputConstants.Type.SCANCODE ? -1 : k.getValue(),
-                        k.getType() == InputConstants.Type.SCANCODE ? k.getValue() : -1))
+                .map(k -> Key.createFromMinecraftName(k.getName(), k.getValue(), -1))
                 .sorted()
                 .toList()
                 .iterator();
