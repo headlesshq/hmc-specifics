@@ -298,6 +298,10 @@ jobs:
   claude-fix:
     name: Claude fix
     needs: [ build, run ]
+    # TODO: this only run Claude once when the PR is opened and fails
+    #   however, Claude cannot react to if the mc-runtime-test fails
+    #   The prompt instructs Claude to use the headlessmc skill to test,
+    #   but we cannot be sure it does. Check next PR this happens!
     if: >
       !cancelled() &&
       contains(needs.*.result, 'failure') &&
