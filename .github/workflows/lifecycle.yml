@@ -27,7 +27,7 @@ concurrency: # FIXME: prevent release commit cancellation
   cancel-in-progress: true
 
 env:
-  HMC_VERSION: 2.10.0
+  HMC_VERSION: 3.0.0-RC2
 
 jobs:
   release-please:
@@ -202,20 +202,21 @@ jobs:
           java-version: ${{ matrix.version.java }}
           distribution: temurin
 
+      # TODO: check configuration!
       - name: Bootstrap HeadlessMC
         run: |
           mkdir -p HeadlessMC run/mods
           cat <<EOF >> HeadlessMC/config.properties
-          hmc.java.versions=$JAVA_HOME/bin/java
-          hmc.gamedir=$PWD/run
-          hmc.offline=true
+          hmc.java.versions=$JAVA_HOME
+          hmc.files.mc=$HOME/.minecraft
+          hmc.files.game=$PWD/run
           hmc.assets.dummy=true
+          hmc.files.game-for-each-version=false
           hmc.jline.enabled=false
-          hmc.rethrow.launch.exceptions=true
-          hmc.exit.on.failed.command=true
-          hmc.test.filename=./hmc-specifics-test.json
-          hmc.loglevel=INFO
+          hmc.test.file=./hmc-specifics-test.json
+          hmc.log.console-level=INFO
           EOF
+          echo "HMC_FILES_LOCATION=$PWD/HeadlessMC" >> "$GITHUB_ENV"
         shell: bash
 
       - name: Get HeadlessMC
@@ -223,7 +224,11 @@ jobs:
         with:
           repository: 3arthqu4ke/headlessmc
           tag: ${{ env.HMC_VERSION }}
-          fileName: headlessmc-launcher-${{ env.HMC_VERSION }}.jar
+          fileName: headlessmc-launcher-linux-x64
+
+      - name: Make HeadlessMC executable
+        run: chmod +x headlessmc-launcher-linux-x64
+        shell: bash
 
       - name: Cache Minecraft
         uses: actions/cache@v4
@@ -231,12 +236,9 @@ jobs:
           path: /home/runner/.minecraft
           key: ${{ matrix.version.mc }}-${{ matrix.version.modloader }}-hmc
 
-      - name: Download ${{ matrix.version.mc }}-${{ matrix.version.modloader }}
+      - name: Download ${{ matrix.version.modloader }}-${{ matrix.version.mc }}
         run: |
-          if [ ! -f "$HOME/.minecraft/versions/${{ matrix.version.mc }}/${{ matrix.version.mc }}.json" ]; then
-            java -jar headlessmc-launcher-${{ env.HMC_VERSION }}.jar --command download ${{ matrix.version.mc }}
-            java -jar headlessmc-launcher-${{ env.HMC_VERSION }}.jar --command ${{ matrix.version.modloader }} ${{ matrix.version.mc }} --java ${{ matrix.version.java }}
-          fi
+          ./headlessmc-launcher-linux-x64 version install ${{ matrix.version.modloader }} ${{ matrix.version.mc }}
         shell: bash
 
       - name: Configure game
@@ -248,7 +250,7 @@ jobs:
         shell: bash
 
       - name: Run game
-        run: java -jar headlessmc-launcher-${{ env.HMC_VERSION }}.jar --command launch ${{ matrix.version.regex }} -regex -lwjgl --retries 3 --jvm -Djava.awt.headless=true
+        run: ./headlessmc-launcher-linux-x64 launch -lwjgl --offline --retries 3 --jvm "-Djava.awt.headless=true -Dhmc.jline.enabled=false" ${{ matrix.version.modloader }} ${{ matrix.version.mc }}
 
   release:
     if: needs.release-please.outputs.release_created == 'true'
@@ -298,6 +300,10 @@ jobs:
   claude-fix:
     name: Claude fix
     needs: [ build, run ]
+    # TODO: this only run Claude once when the PR is opened and fails
+    #   however, Claude cannot react to if the mc-runtime-test fails
+    #   The prompt instructs Claude to use the headlessmc skill to test,
+    #   but we cannot be sure it does. Check next PR this happens!
     if: >
       !cancelled() &&
       contains(needs.*.result, 'failure') &&
