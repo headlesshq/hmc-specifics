@@ -236,9 +236,9 @@ jobs:
           path: /home/runner/.minecraft
           key: ${{ matrix.version.mc }}-${{ matrix.version.modloader }}-hmc
 
-      - name: Download ${{ inputs.modloader }}-${{ inputs.mc }}
+      - name: Download ${{ matrix.version.modloader }}-${{ matrix.mc }}
         run: |
-          ./headlessmc-launcher-linux-x64 version install ${{ inputs.modloader }} ${{ inputs.mc }}
+          ./headlessmc-launcher-linux-x64 version install ${{ matrix.version.modloader }} ${{ matrix.mc }}
         shell: bash
 
       - name: Configure game
@@ -250,7 +250,7 @@ jobs:
         shell: bash
 
       - name: Run game
-        run: ./headlessmc-launcher-linux-x64 launch -lwjgl --offline --retries 3 --jvm "-Djava.awt.headless=true -Dhmc.jline.enabled=false" ${{ inputs.modloader }} ${{ inputs.mc }}
+        run: ./headlessmc-launcher-linux-x64 launch -lwjgl --offline --retries 3 --jvm "-Djava.awt.headless=true -Dhmc.jline.enabled=false" ${{ matrix.version.modloader }} ${{ matrix.mc }}
 
   release:
     if: needs.release-please.outputs.release_created == 'true'
