@@ -4,25 +4,30 @@
     {
       "type": "ENDS_WITH",
       "message": "HMC-Specifics initialized!",
+      "ignoreCase": false,
       "timeout": 600
     },
     {
       "type": "SEND",
       "message": "help",
+      "ignoreCase": false,
       "timeout": 120
     },
     {
       "type": "SEND",
       "message": "quit",
+      "ignoreCase": false,
       "timeout": 120
     },
     {
       "type": "ENDS_WITH",
       "message": "Quitting Minecraft...",
+      "ignoreCase": false,
       "timeout": 60
     },
     {
-      "type": "SUCCESS"
+      "type": "SUCCESS",
+      "ignoreCase": false
     }
   ]
 }
