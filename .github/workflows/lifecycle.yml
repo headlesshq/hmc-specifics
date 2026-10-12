@@ -27,7 +27,7 @@ concurrency: # FIXME: prevent release commit cancellation
   cancel-in-progress: true
 
 env:
-  HMC_VERSION: 3.0.0-RC2
+  HMC_VERSION: 3.0.0-RC5
 
 jobs:
   release-please:
