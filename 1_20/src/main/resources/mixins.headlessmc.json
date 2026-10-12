@@ -21,6 +21,7 @@
   },
   "client": [
     "MixinChatComponent",
+    "MixinClientCommonPacketListenerImpl",
     "IAbstractContainerScreen"
   ]
 }

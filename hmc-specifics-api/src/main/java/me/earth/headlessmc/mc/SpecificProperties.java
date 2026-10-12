@@ -12,4 +12,6 @@ public interface SpecificProperties {
     Property<Boolean> ACCOUNT_REFRESH_ENABLED = bool("hmc.account.refresh.enabled");
     Property<Long> REFRESH_INTERVAL = number("hmc.account.refresh.interval");
 
+    Property<Boolean> AUTO_ACCEPT_SERVER_RESOURCE_PACKS = bool("hmc.resourcepacks.autoaccept");
+
 }

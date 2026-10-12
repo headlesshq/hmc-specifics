@@ -22,6 +22,7 @@
   "client": [
     "AbstractContainerScreenAccessor",
     "IKeyboardHandler",
-    "MixinChatComponent"
+    "MixinChatComponent",
+    "MixinClientCommonPacketListenerImpl"
   ]
 }

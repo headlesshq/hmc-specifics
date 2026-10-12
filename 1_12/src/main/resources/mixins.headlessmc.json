@@ -18,6 +18,7 @@
     "maxShiftBy": 10
   },
   "client": [
-    "MixinGuiNewChat"
+    "MixinGuiNewChat",
+    "MixinNetHandlerPlayClient"
   ]
 }
