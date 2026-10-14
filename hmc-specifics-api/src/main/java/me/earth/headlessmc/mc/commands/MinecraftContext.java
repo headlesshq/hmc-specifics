@@ -14,7 +14,6 @@ import io.github.headlesshq.headlessmc.exceptions.HeadlessMcException;
 import me.earth.headlessmc.mc.Minecraft;
 import me.earth.headlessmc.mc.auth.AccountRefreshingService;
 import me.earth.headlessmc.mc.console.ConsoleWriter;
-import me.earth.headlessmc.mc.console.QuotingArgSplitter;
 import picocli.CommandLine;
 
 import java.io.PrintWriter;
@@ -35,20 +34,22 @@ public class MinecraftContext {
     private static final Logger LOGGER = Logger.getLogger(MinecraftContext.class.getName());
 
     private final List<PrefixedCommand> prefixedCommands = new ArrayList<>();
-    private final ArgSplitter argSplitter = new QuotingArgSplitter();
     private final AccountRefreshingService accountRefreshingService;
     private final LastUsedAccountService lastUsedAccountService;
     private final AuthService authService;
+    private final ArgSplitter argSplitter;
     private final Console console;
     private final Minecraft mc;
 
     public MinecraftContext(Minecraft mc,
                             Console console,
+                            ArgSplitter argSplitter,
                             AuthService authService,
                             LastUsedAccountService lastUsedAccountService,
                             AccountRefreshingService accountRefreshingService) {
         this.mc = mc;
         this.console = console;
+        this.argSplitter = argSplitter;
         this.authService = authService;
         this.lastUsedAccountService = lastUsedAccountService;
         this.accountRefreshingService = accountRefreshingService;

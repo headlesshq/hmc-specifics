@@ -39,7 +39,7 @@ def canBuildJline4 = JavaVersion.current().isJava11Compatible()
 
 // The jline3 and jline4 source sets compile the same sources (src/jline/java) against JLine 3 and JLine 4.
 // They are packaged together with JLine into a bundle jar, which version projects can add to their jarLibs.
-// At runtime the bundle is loaded on an isolated classloader, see me.earth.headlessmc.mc.console.JlineConsoleLoader.
+// At runtime the bundle is loaded on an isolated classloader, see me.earth.headlessmc.mc.console.JlineLoader.
 sourceSets {
     jline3 {
         java.srcDirs = ['src/jline/java']

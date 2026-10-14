@@ -1,5 +1,6 @@
 package me.earth.headlessmc.mc.console;
 
+import io.github.headlesshq.headlessmc.console.ArgSplitter;
 import io.github.headlesshq.headlessmc.console.Console;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -12,7 +13,7 @@ import java.nio.file.Paths;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
-public class JlineConsoleLoaderTest {
+public class JlineLoaderTest {
     @ParameterizedTest
     @ValueSource(strings = {"jline3", "jline4"})
     public void testLoadBundle(String jline) throws Exception {
@@ -20,9 +21,9 @@ public class JlineConsoleLoaderTest {
         assumeTrue(bundle != null, "Bundle for " + jline + " not built, JLine 4 requires Java 11");
         Path bundlePath = Paths.get(bundle);
         try (URLClassLoader bundleLoader = new URLClassLoader(new URL[]{bundlePath.toUri().toURL()}, null)) {
-            JlineConsoleLoader loader = new JlineConsoleLoader(bundleLoader);
+            JlineLoader loader = new JlineLoader(bundleLoader);
             assertTrue(loader.isBundlePresent());
-            Console console = loader.load(true);
+            Console console = loader.loadConsole(true);
             try {
                 assertInstanceOf(IsolatedClassLoader.class, console.getClass().getClassLoader());
                 assertTrue(console.extensions().isPresent());
@@ -33,8 +34,15 @@ public class JlineConsoleLoaderTest {
                 assertSame(console.getClass().getClassLoader(), terminal.getClassLoader());
                 // other classes from the parent are not visible
                 assertThrows(ClassNotFoundException.class, () -> console.getClass().getClassLoader()
-                    .loadClass(JlineConsoleLoaderTest.class.getName()));
+                    .loadClass(JlineLoaderTest.class.getName()));
                 console.write("Test");
+
+                ArgSplitter argSplitter = loader.loadArgSplitter();
+                // console and arg splitter share the same classloader
+                assertSame(console.getClass().getClassLoader(), argSplitter.getClass().getClassLoader());
+                assertArrayEquals(new String[]{"a", "b"}, argSplitter.split("a b "));
+                assertArrayEquals(new String[]{"text", "hello world", "x"}, argSplitter.split("text \"hello world\" x"));
+                assertArrayEquals(new String[]{"a b", "c"}, argSplitter.split("a\\ b c"));
             } finally {
                 ((AutoCloseable) console).close();
             }

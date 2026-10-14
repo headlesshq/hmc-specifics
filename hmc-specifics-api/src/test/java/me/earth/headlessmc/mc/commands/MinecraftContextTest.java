@@ -26,6 +26,7 @@ public class MinecraftContextTest {
         ctx = new MinecraftContext(
             MockMc.INSTANCE,
             console,
+            line -> line.trim().split("\\s+"),
             auth.getAuthService(),
             new McLastUsedAccountService(auth.getLastUsedAccountService(), refreshingService, MockMc.INSTANCE),
             refreshingService

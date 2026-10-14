@@ -1,5 +1,6 @@
 package me.earth.headlessmc.mc;
 
+import io.github.headlesshq.headlessmc.console.ArgSplitter;
 import io.github.headlesshq.headlessmc.console.Console;
 import io.github.headlesshq.headlessmc.console.ConsoleException;
 import io.github.headlesshq.headlessmc.console.ConsoleExtensions;
@@ -7,7 +8,7 @@ import me.earth.headlessmc.mc.auth.AccountRefreshingService;
 import me.earth.headlessmc.mc.auth.HmcAuth;
 import me.earth.headlessmc.mc.auth.McLastUsedAccountService;
 import me.earth.headlessmc.mc.commands.MinecraftContext;
-import me.earth.headlessmc.mc.console.JlineConsoleLoader;
+import me.earth.headlessmc.mc.console.JlineLoader;
 import me.earth.headlessmc.mc.console.StdConsole;
 import me.earth.headlessmc.mc.keyboard.HmcKeyboard;
 import me.earth.headlessmc.mc.log4j.HMCLog4JAppender;
@@ -23,6 +24,7 @@ public class SpecificsInitializer {
     private static final Logger LOGGER = Logger.getLogger(SpecificsInitializer.class.getName());
     private static final String PROMPT = "> ";
 
+    private final JlineLoader jlineLoader = new JlineLoader();
     private final Minecraft mc;
 
     public SpecificsInitializer(Minecraft mc) {
@@ -38,6 +40,7 @@ public class SpecificsInitializer {
 
         HMCLog4JAppender.closeTerminalConsoleAppender();
         Console console = createConsole();
+        ArgSplitter argSplitter = createArgSplitter();
 
         HmcAuth auth = new HmcAuth(HmcAuth.getAuthDir());
         AccountRefreshingService accountRefreshingService = new AccountRefreshingService(auth.getAuthService(), mc);
@@ -46,7 +49,7 @@ public class SpecificsInitializer {
         );
 
         MinecraftContext context = new MinecraftContext(
-            mc, console, auth.getAuthService(), lastUsedAccountService, accountRefreshingService
+            mc, console, argSplitter, auth.getAuthService(), lastUsedAccountService, accountRefreshingService
         );
 
         if (getBoolean(ACCOUNT_REFRESH_ENABLED, true)) {
@@ -60,10 +63,9 @@ public class SpecificsInitializer {
     }
 
     private Console createConsole() {
-        JlineConsoleLoader loader = new JlineConsoleLoader();
-        if (getBoolean(JLINE_ENABLED, true) && loader.isBundlePresent()) {
+        if (getBoolean(JLINE_ENABLED, true) && jlineLoader.isBundlePresent()) {
             try {
-                Console console = loader.load(getBoolean(JLINE_DUMB, false) || isRunningInCI());
+                Console console = jlineLoader.loadConsole(getBoolean(JLINE_DUMB, false) || isRunningInCI());
                 HMCLog4JAppender.install(console);
                 return console;
             } catch (Throwable t) {
@@ -72,6 +74,21 @@ public class SpecificsInitializer {
         }
 
         return new StdConsole();
+    }
+
+    /**
+     * The JLine parser does not need a terminal, so we also use it if the JLine console is disabled.
+     */
+    private ArgSplitter createArgSplitter() {
+        if (jlineLoader.isBundlePresent()) {
+            try {
+                return jlineLoader.loadArgSplitter();
+            } catch (Throwable t) {
+                LOGGER.log(Level.SEVERE, "Failed to load JLine ArgSplitter, falling back to splitting at whitespace", t);
+            }
+        }
+
+        return line -> line.trim().split("\\s+");
     }
 
     private void read(MinecraftContext context) {

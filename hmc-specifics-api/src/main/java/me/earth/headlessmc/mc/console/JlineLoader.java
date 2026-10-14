@@ -1,5 +1,6 @@
 package me.earth.headlessmc.mc.console;
 
+import io.github.headlesshq.headlessmc.console.ArgSplitter;
 import io.github.headlesshq.headlessmc.console.Console;
 
 import java.io.BufferedReader;
@@ -17,20 +18,23 @@ import java.util.logging.Logger;
 
 /**
  * Loads the JLine bundle packaged into HMC-Specifics (a JLine 3 or JLine 4 jar and our console implementation)
- * on an {@link IsolatedClassLoader} and creates a {@link Console} from it.
+ * on an {@link IsolatedClassLoader} and creates a {@link Console} and an {@link ArgSplitter} from it.
+ * The bundle is only extracted once, the console and the arg splitter share the same classloader.
  */
-public class JlineConsoleLoader {
+public class JlineLoader {
     public static final String BUNDLE_DIR = "META-INF/hmc-specifics/jline/";
     public static final String CONSOLE_CLASS = "me.earth.headlessmc.mc.jline.isolated.IsolatedJlineConsole";
-    private static final Logger LOGGER = Logger.getLogger(JlineConsoleLoader.class.getName());
+    public static final String ARG_SPLITTER_CLASS = "me.earth.headlessmc.mc.jline.isolated.IsolatedJlineArgSplitter";
+    private static final Logger LOGGER = Logger.getLogger(JlineLoader.class.getName());
 
     private final ClassLoader resourceLoader;
+    private IsolatedClassLoader classLoader;
 
-    public JlineConsoleLoader() {
-        this(JlineConsoleLoader.class.getClassLoader());
+    public JlineLoader() {
+        this(JlineLoader.class.getClassLoader());
     }
 
-    public JlineConsoleLoader(ClassLoader resourceLoader) {
+    public JlineLoader(ClassLoader resourceLoader) {
         this.resourceLoader = resourceLoader;
     }
 
@@ -38,7 +42,25 @@ public class JlineConsoleLoader {
         return resourceLoader.getResource(BUNDLE_DIR + "index.txt") != null;
     }
 
-    public Console load(boolean dumb) throws IOException, ReflectiveOperationException {
+    public Console loadConsole(boolean dumb) throws IOException, ReflectiveOperationException {
+        Class<?> consoleClass = Class.forName(CONSOLE_CLASS, true, getClassLoader());
+        return (Console) consoleClass.getConstructor(boolean.class).newInstance(dumb);
+    }
+
+    public ArgSplitter loadArgSplitter() throws IOException, ReflectiveOperationException {
+        Class<?> argSplitterClass = Class.forName(ARG_SPLITTER_CLASS, true, getClassLoader());
+        return (ArgSplitter) argSplitterClass.getConstructor().newInstance();
+    }
+
+    public synchronized IsolatedClassLoader getClassLoader() throws IOException {
+        if (classLoader == null) {
+            classLoader = createClassLoader();
+        }
+
+        return classLoader;
+    }
+
+    private IsolatedClassLoader createClassLoader() throws IOException {
         List<String> jars = readIndex();
         Path dir = Files.createTempDirectory("hmc-specifics-jline");
         dir.toFile().deleteOnExit();
@@ -49,9 +71,7 @@ public class JlineConsoleLoader {
         }
 
         LOGGER.info("Loading JLine from " + jars);
-        IsolatedClassLoader classLoader = new IsolatedClassLoader(urls, Console.class.getClassLoader());
-        Class<?> consoleClass = Class.forName(CONSOLE_CLASS, true, classLoader);
-        return (Console) consoleClass.getConstructor(boolean.class).newInstance(dumb);
+        return new IsolatedClassLoader(urls, Console.class.getClassLoader());
     }
 
     private List<String> readIndex() throws IOException {

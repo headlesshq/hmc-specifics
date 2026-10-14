@@ -32,7 +32,7 @@ import java.util.logging.Logger;
  * it may only reference JLine, the JDK and {@code io.github.headlesshq.headlessmc} classes.
  * It is compiled against JLine 3 and against JLine 4.
  */
-@SuppressWarnings("unused") // instantiated reflectively by JlineConsoleLoader
+@SuppressWarnings("unused") // instantiated reflectively by JlineLoader
 public final class IsolatedJlineConsole implements Console, ConsoleExtensions, AutoCloseable {
     private static final Logger LOGGER = Logger.getLogger(IsolatedJlineConsole.class.getName());
 
