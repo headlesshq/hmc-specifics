@@ -27,7 +27,7 @@ concurrency: # FIXME: prevent release commit cancellation
   cancel-in-progress: true
 
 env:
-  HMC_VERSION: 3.0.0-RC5
+  HMC_VERSION: 3.0.0-RC7
 
 jobs:
   release-please:
@@ -181,7 +181,7 @@ jobs:
         ${{ insert }}: ${{ fromJSON(needs.matrices.outputs.run-matrix) }}
         xvfb: [false]
     steps:
-      - name: Checkout # TODO: simplify away this step, currently needed for `uses: ./`
+      - name: Checkout # for hmc-specifics-test.json
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           fetch-depth: 1
@@ -191,10 +191,12 @@ jobs:
         with:
           name: jars-${{ matrix.version.mc }}
 
+      # hmc-specifics-test-mod.jar adds commands through the API like other mods would, see hmc-specifics-test.json
       - name: Bootstrap mods
         run: |
           mkdir -p run/mods
           cp hmc-specifics-*-${{ matrix.version.type }}-release.jar run/mods
+          cp hmc-specifics-test-mod.jar run/mods
 
       - name: Setup Java temurin-${{ matrix.version.java }}
         uses: actions/setup-java@v5
@@ -202,55 +204,26 @@ jobs:
           java-version: ${{ matrix.version.java }}
           distribution: temurin
 
-      # TODO: check configuration!
-      - name: Bootstrap HeadlessMC
+      # mc-runtime-test appends its own configuration to this file
+      - name: Configure HeadlessMC test
         run: |
-          mkdir -p HeadlessMC run/mods
+          mkdir -p HeadlessMC
           cat <<EOF >> HeadlessMC/config.properties
-          hmc.java.versions=$JAVA_HOME
-          hmc.files.mc=$HOME/.minecraft
-          hmc.files.game=$PWD/run
-          hmc.assets.dummy=true
-          hmc.files.game-for-each-version=false
-          hmc.jline.enabled=false
-          hmc.test.file=./hmc-specifics-test.json
+          hmc.test.file=$PWD/hmc-specifics-test.json
           hmc.log.console-level=INFO
-          EOF
-          echo "HMC_FILES_LOCATION=$PWD/HeadlessMC" >> "$GITHUB_ENV"
-        shell: bash
-
-      - name: Get HeadlessMC
-        uses: robinraju/release-downloader@a96f54c1b5f5e09e47d9504526e96febd949d4c2 # v1.11
-        with:
-          repository: 3arthqu4ke/headlessmc
-          tag: ${{ env.HMC_VERSION }}
-          fileName: headlessmc-launcher-linux-x64
-
-      - name: Make HeadlessMC executable
-        run: chmod +x headlessmc-launcher-linux-x64
-        shell: bash
-
-      - name: Cache Minecraft
-        uses: actions/cache@v4
-        with:
-          path: /home/runner/.minecraft
-          key: ${{ matrix.version.mc }}-${{ matrix.version.modloader }}-hmc
-
-      - name: Download ${{ matrix.version.modloader }}-${{ matrix.version.mc }}
-        run: |
-          ./headlessmc-launcher-linux-x64 version install ${{ matrix.version.modloader }} ${{ matrix.version.mc }}
-        shell: bash
-
-      - name: Configure game
-        run: |
-          cat <<EOF >> run/options.txt
-          onboardAccessibility:false
-          pauseOnLostFocus:false
           EOF
         shell: bash
 
       - name: Run game
-        run: ./headlessmc-launcher-linux-x64 launch -lwjgl --offline --retries 3 --jvm "-Djava.awt.headless=true -Dhmc.jline.enabled=false" ${{ matrix.version.modloader }} ${{ matrix.version.mc }}
+        uses: headlesshq/mc-runtime-test@dfc8a2a0145f723b01abda5e1cf59eaba516d128 # 5.0.0
+        with:
+          mc: ${{ matrix.version.mc }}
+          modloader: ${{ matrix.version.modloader }}
+          java: ${{ matrix.version.java }}
+          mc-runtime-test: none
+          xvfb: false
+          hmc-version: ${{ env.HMC_VERSION }}
+          headlessmc-command: --retries 3 --jvm "-Djava.awt.headless=true -Dhmc.jline.enabled=false"
 
   release:
     if: needs.release-please.outputs.release_created == 'true'

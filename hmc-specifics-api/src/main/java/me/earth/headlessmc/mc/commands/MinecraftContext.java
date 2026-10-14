@@ -31,8 +31,8 @@ public class MinecraftContext {
     private static final Logger LOGGER = Logger.getLogger(MinecraftContext.class.getName());
 
     private final List<PrefixedCommand> prefixedCommands = new ArrayList<>();
-    private final CommandRegistry commandRegistry;
-    private final List<CommandRegistry.Entry> commands;
+    private final ClassLoader classLoader = MinecraftContext.class.getClassLoader();
+    private volatile Commands commands;
     private final AccountRefreshingService accountRefreshingService;
     private final LastUsedAccountService lastUsedAccountService;
     private final AuthService authService;
@@ -55,13 +55,13 @@ public class MinecraftContext {
         prefixedCommands.add(new CommandCommand(this));
         prefixedCommands.add(new MessageCommand(this, ".", "."));
         prefixedCommands.add(new MessageCommand(this, "msg", "msg "));
-        this.commandRegistry = CommandRegistry.load(MinecraftContext.class.getClassLoader());
-        this.commands = validateCommands(commandRegistry.getCommands());
+        updateCommands();
     }
 
     public CommandLine createCommandLine() {
-        CommandLine commandLine = createRootCommandLine();
-        for (CommandRegistry.Entry command : commands) {
+        Commands commands = updateCommands();
+        CommandLine commandLine = createRootCommandLine(commands.registry);
+        for (CommandRegistry.Entry command : commands.entries) {
             addCommand(commandLine, command);
         }
 
@@ -153,25 +153,39 @@ public class MinecraftContext {
     }
 
     public List<CommandRegistry.Entry> getCommands() {
-        return commands;
+        return updateCommands().entries;
     }
 
     public List<PrefixedCommand> getPrefixedCommands() {
         return Collections.unmodifiableList(prefixedCommands);
     }
 
-    private CommandLine createRootCommandLine() {
-        return new CommandLine(new RootCommand(), new PicocliFactory(this, commandRegistry.getFactories()));
+    private CommandLine createRootCommandLine(CommandRegistry registry) {
+        return new CommandLine(new RootCommand(), new PicocliFactory(this, registry.getFactories()));
+    }
+
+    /**
+     * Reloads the {@link CommandRegistry} if mods have been added to the classpath since it was last loaded.
+     */
+    private synchronized Commands updateCommands() {
+        Commands current = commands;
+        if (current == null || !current.registry.isUpToDate(classLoader)) {
+            CommandRegistry registry = CommandRegistry.load(classLoader);
+            current = new Commands(registry, validateCommands(registry));
+            commands = current;
+        }
+
+        return current;
     }
 
     /**
      * Adds every command once, so that commands which can not be instantiated
-     * or whose names clash with other commands are only reported once, at startup.
+     * or whose names clash with other commands are only reported once, when they are loaded.
      */
-    private List<CommandRegistry.Entry> validateCommands(List<CommandRegistry.Entry> entries) {
+    private List<CommandRegistry.Entry> validateCommands(CommandRegistry registry) {
         List<CommandRegistry.Entry> result = new ArrayList<>();
-        CommandLine commandLine = createRootCommandLine();
-        for (CommandRegistry.Entry entry : entries) {
+        CommandLine commandLine = createRootCommandLine(registry);
+        for (CommandRegistry.Entry entry : registry.getCommands()) {
             try {
                 addCommand(commandLine, entry);
                 result.add(entry);
@@ -214,6 +228,16 @@ public class MinecraftContext {
         } else {
             LOGGER.log(Level.SEVERE, "Command failed", throwable);
             log("An error occurred: " + throwable);
+        }
+    }
+
+    private static final class Commands {
+        private final CommandRegistry registry;
+        private final List<CommandRegistry.Entry> entries;
+
+        private Commands(CommandRegistry registry, List<CommandRegistry.Entry> entries) {
+            this.registry = registry;
+            this.entries = entries;
         }
     }
 

@@ -108,6 +108,37 @@ for (String jline : ['jline3', 'jline4']) {
     artifacts.add("${name}Bundle", bundleJar)
 }
 
+// A small mod that registers commands through the API, like other mods would, for the in-game tests in CI.
+// See hmc-specifics-test.json. The stubs replace the classes of the modloaders and are not packaged.
+// testModJar is written to build/libs of the root project, so that version projects upload it with their jars.
+sourceSets {
+    testModStubs
+    testMod {
+        compileClasspath += sourceSets.main.output + sourceSets.testModStubs.output
+    }
+}
+
+configurations {
+    testModCompileOnly.extendsFrom compileOnly, implementation
+}
+
+for (String name : ['compileTestModJava', 'compileTestModStubsJava']) {
+    tasks.named(name, JavaCompile) {
+        if (JavaVersion.current().ordinal() > JavaVersion.VERSION_1_8.ordinal()) {
+            options.release = 8
+        }
+    }
+}
+
+def testModJar = tasks.register('testModJar', Jar) {
+    group = 'build'
+    archiveFileName = 'hmc-specifics-test-mod.jar'
+    destinationDirectory = rootProject.layout.buildDirectory.dir('libs')
+    from sourceSets.testMod.output
+}
+
+tasks.named('build') { dependsOn(testModJar) }
+
 dependencies {
     compileOnly (group: 'net.minecrell', name: 'terminalconsoleappender', version: '1.3.0') {
         transitive false
@@ -144,6 +175,7 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.9.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
+    testRuntimeOnly files(testModJar)
 }
 
 test {

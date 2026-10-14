@@ -1,33 +1,1182 @@
 {
   "name": "Hmc-Specifics Test",
+  "timeout": 120,
   "steps": [
     {
       "type": "ENDS_WITH",
       "message": "HMC-Specifics initialized!",
-      "ignoreCase": false,
-      "timeout": 600
+      "timeout": 600,
+      "or": [
+        {
+          "type": "REGEX",
+          "message": ".*Failed to (load|register) command (?!.*(DoesNotExist|doesnotexist)).*",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Failed to load JLine ArgSplitter",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "An error occurred: ",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Command failed",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Couldn't find command for",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        }
+      ]
     },
     {
       "type": "SEND",
-      "message": "help",
-      "ignoreCase": false,
-      "timeout": 120
+      "message": "help"
+    },
+    {
+      "type": "REGEX",
+      "message": "\\s+connect\\s+Connects you to a server\\..*",
+      "or": [
+        {
+          "type": "REGEX",
+          "message": ".*Failed to (load|register) command (?!.*(DoesNotExist|doesnotexist)).*",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Failed to load JLine ArgSplitter",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "An error occurred: ",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Command failed",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Couldn't find command for",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "REGEX",
+      "message": "\\s+account, auth, login.*",
+      "or": [
+        {
+          "type": "REGEX",
+          "message": ".*Failed to (load|register) command (?!.*(DoesNotExist|doesnotexist)).*",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Failed to load JLine ArgSplitter",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "An error occurred: ",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Command failed",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Couldn't find command for",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "ENDS_WITH",
+      "message": "Sends a chat command.",
+      "or": [
+        {
+          "type": "REGEX",
+          "message": ".*Failed to (load|register) command (?!.*(DoesNotExist|doesnotexist)).*",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Failed to load JLine ArgSplitter",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "An error occurred: ",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Command failed",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Couldn't find command for",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        }
+      ]
     },
     {
       "type": "SEND",
-      "message": "quit",
-      "ignoreCase": false,
-      "timeout": 120
+      "message": "conect 2b2t.org"
+    },
+    {
+      "type": "ENDS_WITH",
+      "message": "Couldn't find command for 'conect 2b2t.org'. Use 'help' to list all commands.",
+      "or": [
+        {
+          "type": "REGEX",
+          "message": ".*Failed to (load|register) command (?!.*(DoesNotExist|doesnotexist)).*",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Failed to load JLine ArgSplitter",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "An error occurred: ",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Command failed",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "CONTAINS",
+      "message": "Did you mean:",
+      "and": [
+        {
+          "type": "CONTAINS",
+          "message": "connect"
+        }
+      ],
+      "or": [
+        {
+          "type": "REGEX",
+          "message": ".*Failed to (load|register) command (?!.*(DoesNotExist|doesnotexist)).*",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Failed to load JLine ArgSplitter",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "An error occurred: ",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Command failed",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "SEND",
+      "message": "help account"
+    },
+    {
+      "type": "REGEX",
+      "message": "\\s+current\\s+Displays the account Minecraft is currently using\\..*",
+      "or": [
+        {
+          "type": "REGEX",
+          "message": ".*Failed to (load|register) command (?!.*(DoesNotExist|doesnotexist)).*",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Failed to load JLine ArgSplitter",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "An error occurred: ",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Command failed",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Couldn't find command for",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "REGEX",
+      "message": "\\s+token\\s+Uses an account.*",
+      "or": [
+        {
+          "type": "REGEX",
+          "message": ".*Failed to (load|register) command (?!.*(DoesNotExist|doesnotexist)).*",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Failed to load JLine ArgSplitter",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "An error occurred: ",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Command failed",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Couldn't find command for",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "REGEX",
+      "message": "\\s+autorefresh\\s+Manages the service.*",
+      "or": [
+        {
+          "type": "REGEX",
+          "message": ".*Failed to (load|register) command (?!.*(DoesNotExist|doesnotexist)).*",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Failed to load JLine ArgSplitter",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "An error occurred: ",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Command failed",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Couldn't find command for",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "SEND",
+      "message": "account token \"Test Name\" random token123"
+    },
+    {
+      "type": "ENDS_WITH",
+      "message": "Logging in with account Test Name",
+      "timeout": 600,
+      "or": [
+        {
+          "type": "REGEX",
+          "message": ".*Failed to (load|register) command (?!.*(DoesNotExist|doesnotexist)).*",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Failed to load JLine ArgSplitter",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "An error occurred: ",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Command failed",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Couldn't find command for",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "SEND",
+      "message": "account current"
+    },
+    {
+      "type": "ENDS_WITH",
+      "message": "Current account: Test Name",
+      "or": [
+        {
+          "type": "REGEX",
+          "message": ".*Failed to (load|register) command (?!.*(DoesNotExist|doesnotexist)).*",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Failed to load JLine ArgSplitter",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "An error occurred: ",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Command failed",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Couldn't find command for",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "SEND",
+      "message": "account token Escaped\\ Name random token123"
+    },
+    {
+      "type": "ENDS_WITH",
+      "message": "Logging in with account Escaped Name",
+      "or": [
+        {
+          "type": "REGEX",
+          "message": ".*Failed to (load|register) command (?!.*(DoesNotExist|doesnotexist)).*",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Failed to load JLine ArgSplitter",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "An error occurred: ",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Command failed",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Couldn't find command for",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "SEND",
+      "message": "account autorefresh status"
+    },
+    {
+      "type": "REGEX",
+      "message": ".*Account refresh (not )?running\\.",
+      "or": [
+        {
+          "type": "REGEX",
+          "message": ".*Failed to (load|register) command (?!.*(DoesNotExist|doesnotexist)).*",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Failed to load JLine ArgSplitter",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "An error occurred: ",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Command failed",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Couldn't find command for",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "SEND",
+      "message": "memory"
+    },
+    {
+      "type": "REGEX",
+      "message": "-Max:\\s+\\d+mb",
+      "or": [
+        {
+          "type": "REGEX",
+          "message": ".*Failed to (load|register) command (?!.*(DoesNotExist|doesnotexist)).*",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Failed to load JLine ArgSplitter",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "An error occurred: ",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Command failed",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Couldn't find command for",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "SEND",
+      "message": "gui"
+    },
+    {
+      "type": "REGEX",
+      "message": "Screen: .+",
+      "or": [
+        {
+          "type": "REGEX",
+          "message": ".*Failed to (load|register) command (?!.*(DoesNotExist|doesnotexist)).*",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Failed to load JLine ArgSplitter",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "An error occurred: ",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Command failed",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Couldn't find command for",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "ENDS_WITH",
+      "message": "Buttons:",
+      "or": [
+        {
+          "type": "REGEX",
+          "message": ".*Failed to (load|register) command (?!.*(DoesNotExist|doesnotexist)).*",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Failed to load JLine ArgSplitter",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "An error occurred: ",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Command failed",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Couldn't find command for",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "SEND",
+      "message": "msg hello"
+    },
+    {
+      "type": "ENDS_WITH",
+      "message": "You need to be ingame to send a message!",
+      "or": [
+        {
+          "type": "REGEX",
+          "message": ".*Failed to (load|register) command (?!.*(DoesNotExist|doesnotexist)).*",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Failed to load JLine ArgSplitter",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "An error occurred: ",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Command failed",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Couldn't find command for",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "SEND",
+      "message": "/help"
+    },
+    {
+      "type": "ENDS_WITH",
+      "message": "You need to be ingame to send a command!",
+      "or": [
+        {
+          "type": "REGEX",
+          "message": ".*Failed to (load|register) command (?!.*(DoesNotExist|doesnotexist)).*",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Failed to load JLine ArgSplitter",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "An error occurred: ",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Command failed",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Couldn't find command for",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "SEND",
+      "message": "hmcs-test \"Test Name\""
+    },
+    {
+      "type": "ENDS_WITH",
+      "message": "[hmcs-test] Hello Test Name!",
+      "or": [
+        {
+          "type": "REGEX",
+          "message": ".*Failed to (load|register) command (?!.*(DoesNotExist|doesnotexist)).*",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Failed to load JLine ArgSplitter",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "An error occurred: ",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Command failed",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Couldn't find command for",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "SEND",
+      "message": "hmcs-test scheduled"
+    },
+    {
+      "type": "ENDS_WITH",
+      "message": "[hmcs-test] Scheduled command executed.",
+      "or": [
+        {
+          "type": "REGEX",
+          "message": ".*Failed to (load|register) command (?!.*(DoesNotExist|doesnotexist)).*",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Failed to load JLine ArgSplitter",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "An error occurred: ",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Command failed",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Couldn't find command for",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "SEND",
+      "message": "account hmcs-test"
+    },
+    {
+      "type": "ENDS_WITH",
+      "message": "[hmcs-test] Account subcommand executed.",
+      "or": [
+        {
+          "type": "REGEX",
+          "message": ".*Failed to (load|register) command (?!.*(DoesNotExist|doesnotexist)).*",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Failed to load JLine ArgSplitter",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "An error occurred: ",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Command failed",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Couldn't find command for",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "SEND",
+      "message": "quit"
     },
     {
       "type": "ENDS_WITH",
       "message": "Quitting Minecraft...",
-      "ignoreCase": false,
-      "timeout": 60
+      "timeout": 60,
+      "or": [
+        {
+          "type": "REGEX",
+          "message": ".*Failed to (load|register) command (?!.*(DoesNotExist|doesnotexist)).*",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Failed to load JLine ArgSplitter",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "An error occurred: ",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Command failed",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Couldn't find command for",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        }
+      ]
     },
     {
-      "type": "SUCCESS",
-      "ignoreCase": false
+      "type": "SUCCESS"
     }
   ]
 }

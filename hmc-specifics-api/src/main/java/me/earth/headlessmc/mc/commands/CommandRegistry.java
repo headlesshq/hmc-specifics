@@ -34,15 +34,19 @@ import java.util.logging.Logger;
  * Classes that can not be instantiated by the {@link PicocliFactory} need a {@link CommandFactory}.
  * The order in which the files of different mods are read is not defined,
  * so commands are sorted by their number of parents, parent commands are always registered before their subcommands.
+ * Some modloaders, e.g. Forge before 1.13, add mods to the classpath after HMC-Specifics has been initialized,
+ * check {@link #isUpToDate(ClassLoader)} to find out if new files have been added.
  */
 public class CommandRegistry {
     public static final String COMMANDS_FILE = "META-INF/hmc-specifics-commands";
     private static final Logger LOGGER = Logger.getLogger(CommandRegistry.class.getName());
 
+    private final List<String> files;
     private final List<Entry> commands;
     private final Map<Class<?>, CommandFactory<?>> factories;
 
-    public CommandRegistry(List<Entry> commands, Map<Class<?>, CommandFactory<?>> factories) {
+    public CommandRegistry(List<String> files, List<Entry> commands, Map<Class<?>, CommandFactory<?>> factories) {
+        this.files = Collections.unmodifiableList(new ArrayList<>(files));
         List<Entry> sorted = new ArrayList<>(commands);
         sorted.sort(Comparator.comparingInt(entry -> entry.getParents().size())); // stable, keeps the order of each file
         this.commands = Collections.unmodifiableList(sorted);
@@ -50,7 +54,20 @@ public class CommandRegistry {
     }
 
     public static CommandRegistry load(ClassLoader classLoader) {
-        return new CommandRegistry(loadCommands(classLoader), loadFactories(classLoader));
+        List<String> files = findFiles(classLoader);
+        return new CommandRegistry(files, loadCommands(files, classLoader), loadFactories(classLoader));
+    }
+
+    /**
+     * @param classLoader the classloader to search for {@value #COMMANDS_FILE} files.
+     * @return {@code true} if the classloader finds the same files that this registry has been loaded from.
+     */
+    public boolean isUpToDate(ClassLoader classLoader) {
+        return files.equals(findFiles(classLoader));
+    }
+
+    public List<String> getFiles() {
+        return files;
     }
 
     public List<Entry> getCommands() {
@@ -61,7 +78,7 @@ public class CommandRegistry {
         return factories;
     }
 
-    private static List<Entry> loadCommands(ClassLoader classLoader) {
+    private static List<String> findFiles(ClassLoader classLoader) {
         Set<String> urls = new LinkedHashSet<>();
         try {
             Enumeration<URL> resources = classLoader.getResources(COMMANDS_FILE);
@@ -72,6 +89,10 @@ public class CommandRegistry {
             LOGGER.log(Level.SEVERE, "Failed to find " + COMMANDS_FILE + " files", e);
         }
 
+        return new ArrayList<>(urls);
+    }
+
+    private static List<Entry> loadCommands(List<String> urls, ClassLoader classLoader) {
         List<Entry> result = new ArrayList<>();
         for (String url : urls) {
             try (InputStream is = new URL(url).openStream();

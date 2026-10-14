@@ -124,6 +124,21 @@ public class MinecraftContextTest {
     }
 
     @Test
+    public void testTestMod() {
+        // hmc-specifics-test-mod.jar is on the test runtime classpath, its commands are used by hmc-specifics-test.json
+        ctx.execute("hmcs-test Steve");
+        assertEquals("[hmcs-test] Hello Steve!", console.joined());
+
+        console.output.clear();
+        ctx.execute("hmcs-test scheduled");
+        assertEquals("[hmcs-test] Scheduled command executed.", console.joined());
+
+        console.output.clear();
+        ctx.execute("account hmcs-test");
+        assertEquals("[hmcs-test] Account subcommand executed.", console.joined());
+    }
+
+    @Test
     public void testAccountCompletionsFactory() throws Exception {
         PicocliFactory factory = new PicocliFactory(ctx, CommandRegistry.load(getClass().getClassLoader()).getFactories());
         assertNotNull(factory.create(io.github.headlesshq.headlessmc.commands.auth.AccountCompletions.class));
