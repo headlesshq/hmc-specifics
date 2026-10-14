@@ -1,29 +1,23 @@
 package me.earth.headlessmc.mc.commands;
 
-import me.earth.headlessmc.api.HeadlessMc;
-import me.earth.headlessmc.api.command.CommandException;
-import me.earth.headlessmc.api.command.ParseUtil;
-import me.earth.headlessmc.mc.Minecraft;
+import picocli.CommandLine;
 
-public class ConnectCommand extends AbstractMinecraftCommand
-    implements ScheduledCommand {
-    public ConnectCommand(HeadlessMc ctx, Minecraft mc) {
-        super(ctx, mc, "connect", "Connects you to a server.");
+@CommandLine.Command(name = "connect", description = "Connects you to a server.")
+public class ConnectCommand extends AbstractMinecraftCommand implements ScheduledCommand {
+    @CommandLine.Parameters(index = "0", paramLabel = "<ip>", description = "The ip of the server.")
+    private String ip;
+
+    @CommandLine.Parameters(index = "1", arity = "0..1", paramLabel = "<port>", description = "The port of the server, 25565 by default.")
+    private int port = 25565;
+
+    public ConnectCommand(MinecraftContext ctx) {
+        super(ctx);
     }
 
     @Override
-    public void execute(String line, String... args) throws CommandException {
-        if (args.length <= 1) {
-            throw new CommandException("Please specify an Ip!");
-        }
-
-        int port = 25565;
-        if (args.length > 2) {
-            port = ParseUtil.parseI(args[2]);
-        }
-
-        ctx.log("Connecting to server " + args[1] + " at port " + port + "...");
-        mc.connect(args[1], port);
+    protected void execute() throws CommandException {
+        ctx.log("Connecting to server " + ip + " at port " + port + "...");
+        mc.connect(ip, port);
     }
 
 }

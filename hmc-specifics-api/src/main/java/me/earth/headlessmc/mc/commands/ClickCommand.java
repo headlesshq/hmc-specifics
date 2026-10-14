@@ -1,71 +1,73 @@
 package me.earth.headlessmc.mc.commands;
 
-import me.earth.headlessmc.api.HeadlessMc;
-import me.earth.headlessmc.api.command.CommandException;
-import me.earth.headlessmc.api.command.CommandUtil;
-import me.earth.headlessmc.mc.Minecraft;
 import me.earth.headlessmc.mc.gui.GuiButton;
 import me.earth.headlessmc.mc.gui.GuiElement;
 import me.earth.headlessmc.mc.gui.GuiScreen;
+import picocli.CommandLine;
 
-import static me.earth.headlessmc.api.command.ParseUtil.parseI;
+import java.util.ArrayList;
+import java.util.List;
 
-public class ClickCommand extends AbstractGuiCommand
-    implements ScheduledCommand {
-    public ClickCommand(HeadlessMc ctx, Minecraft mc) {
-        super(ctx, mc, "click", "Performs clicks in the Gui.");
+@CommandLine.Command(
+    name = "click",
+    description = "Performs clicks in the Gui.",
+    customSynopsis = "click <id> [<button>] [-enable]%n   or: click p <x> <y> [<button>]"
+)
+public class ClickCommand extends AbstractGuiCommand implements ScheduledCommand {
+    @CommandLine.Parameters(index = "0", paramLabel = "<id|p>", description = "The id of the element to click, or p to click at a position.")
+    private String target;
+
+    @CommandLine.Parameters(index = "1..*", arity = "0..3", paramLabel = "<value>", description = "<button>, or <x> <y> [<button>] when clicking at a position.")
+    private List<Integer> values = new ArrayList<>();
+
+    @CommandLine.Option(names = "-enable", description = "Enables the button before clicking it.")
+    private boolean enable;
+
+    public ClickCommand(MinecraftContext ctx) {
+        super(ctx);
     }
 
     @Override
-    public void execute(GuiScreen gui, String... args)
-        throws CommandException {
-        if (args.length <= 1) {
-            throw new CommandException("Please specify where to click.");
-        }
-
+    public void execute(GuiScreen gui) throws CommandException {
         int b = 0;
         int x;
         int y;
 
-        if ("p".equalsIgnoreCase(args[1])) {
-            if (args.length < 4) {
-                throw new CommandException(
-                    "Expected x and y at positions 2 and 3!");
+        if ("p".equalsIgnoreCase(target)) {
+            if (values.size() < 2) {
+                throw new CommandException("Expected x and y at positions 2 and 3!");
             }
 
-            x = parseI(args[2]);
-            y = parseI(args[3]);
-            if (args.length > 4) {
-                b = parseI(args[4]);
+            x = values.get(0);
+            y = values.get(1);
+            if (values.size() > 2) {
+                b = values.get(2);
             }
         } else {
             GuiElement element = gui
                 .getAllElements()
                 .stream()
-                .filter(e -> String.valueOf(e.getId()).equals(args[1]))
+                .filter(e -> String.valueOf(e.getId()).equals(target))
                 .findFirst()
                 .orElse(null);
 
             if (element == null) {
-                throw new CommandException(String.format(
-                    "Couldn't find GuiElement with id %s", args[1]));
+                throw new CommandException(String.format("Couldn't find GuiElement with id %s", target));
             }
 
-            if (element instanceof GuiButton
-                && CommandUtil.hasFlag("-enable", args)) {
+            if (element instanceof GuiButton && enable) {
                 ((GuiButton) element).setEnabled(true);
             }
 
             x = element.getX() + element.getWidth() / 2;
             y = element.getY() + element.getHeight() / 2;
-            if (args.length > 2 && !args[2].equalsIgnoreCase("-enable")) {
-                b = parseI(args[2]);
+            if (!values.isEmpty()) {
+                b = values.get(0);
             }
         }
 
         ctx.log(String.format("Clicking at x=%d, y=%d, button=%d", x, y, b));
-        int finalButton = b;
-        gui.click(x, y, finalButton);
+        gui.click(x, y, b);
     }
 
 }

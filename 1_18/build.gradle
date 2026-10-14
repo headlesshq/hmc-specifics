@@ -53,6 +53,11 @@ repositories {
         name 'SuperDirMaven'
         url new File(layout.projectDirectory.asFile.getParent() + "/libs").toURI().toURL().toString()
     }
+    maven {
+        // HeadlessMC v3 is not released yet, see the publishHeadlessMcV3 task of hmc-specifics-api
+        name 'HeadlessMcV3Maven'
+        url new File(layout.projectDirectory.asFile.getParent() + "/HeadlessMC/headlessmc-code/build/maven").toURI().toURL().toString()
+    }
 }
 
 unimined.minecraft {
@@ -125,7 +130,6 @@ for (String platform_capitalized : ['Fabric', 'Lexforge']) {
         if ('fabricShadowJar' != it.name) {
             it.configurations += [ project.configurations.forgeJarLibs ]
             it.dependencies {
-                exclude(dependency('org.jline:jline:.*'))
                 exclude(dependency('com.google.errorprone:error_prone_annotations:.*'))
                 exclude(dependency('com.google.code.gson:gson:.*'))
                 exclude(dependency('net.java.dev.jna:jna:.*'))
@@ -142,29 +146,15 @@ for (String platform_capitalized : ['Fabric', 'Lexforge']) {
 
 dependencies {
     compileOnly 'org.spongepowered:mixin:0.8.5'
-    lwjglAgent "me.earth.headlessmc:headlessmc-lwjgl:${project(':hmc-specifics-api').headlessmc_version}"
+    lwjglAgent 'me.earth.headlessmc:headlessmc-lwjgl:2.6.2' // dev only, TODO: HeadlessMC v3 lwjgl agent
     implementation ('net.minecraft:launchwrapper:1.12') {
         exclude module: 'log4j-api'
         exclude module: 'log4j-core'
     }
 
     jarLibs project(':hmc-specifics-api')
+    jarLibs project(path: ':hmc-specifics-api', configuration: 'jline3Bundle')
     jarLibs 'com.github.ImpactDevelopment:SimpleTweaker:1.2'
-    jarLibs "me.earth.headlessmc:headlessmc-api:${project(':hmc-specifics-api').headlessmc_version}"
-    jarLibs "me.earth.headlessmc:headlessmc-runtime:${project(':hmc-specifics-api').headlessmc_version}"
-    jarLibs ("me.earth.headlessmc:headlessmc-jline:${project(':hmc-specifics-api').headlessmc_version}") {
-        exclude module: 'jline'
-    }
-
-    forgeJarLibs (group: 'org.jline', name: 'jline-terminal-jna', version: '3.12.1') {
-        exclude module: 'jline'
-        exclude module: 'jline-terminal'
-    }
-
-    fabricJarLibs (group: 'org.jline', name: 'jline-terminal-jna', version: '3.26.3') {
-        exclude module: 'jline'
-        exclude module: 'jline-terminal'
-    }
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'

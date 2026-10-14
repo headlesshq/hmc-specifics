@@ -1,17 +1,16 @@
 package me.earth.headlessmc.mc.commands;
 
-import me.earth.headlessmc.api.HeadlessMc;
-import me.earth.headlessmc.mc.Minecraft;
 import me.earth.headlessmc.mc.player.Player;
+import picocli.CommandLine;
 
-public class CloseCommand extends AbstractPlayerCommand
-    implements ScheduledCommand {
-    public CloseCommand(HeadlessMc ctx, Minecraft mc) {
-        super(ctx, mc, "close", "Closes the current screen, if ingame.");
+@CommandLine.Command(name = "close", description = "Closes the current screen, if ingame.")
+public class CloseCommand extends AbstractPlayerCommand implements ScheduledCommand {
+    public CloseCommand(MinecraftContext ctx) {
+        super(ctx);
     }
 
     @Override
-    protected void execute(Player player, String... args) {
+    protected void execute(Player player) {
         ctx.log("Closing current screen...");
         player.closeScreen();
     }

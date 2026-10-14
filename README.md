@@ -27,7 +27,7 @@ that case.
 | close      | Closes the menu if ingame.                             |                                         |
 | connect    | Connects you to a server.                              | \<ip\> \<port\>                         |
 | disconnect | Disconnects you from a server.                         |                                         |
-| login      | Log into a Minecraft Account                           |                                         |
+| account    | Manage accounts, alias login. Subcommands: login, list, select, remove, refresh, current, token, autorefresh | -p \<provider\> |
 | msg or .   | Sends a chat message.                                  | \<message\>                             |
 | /          | Sends a chat command.                                  | \<command\>                             |
 

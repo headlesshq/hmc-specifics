@@ -1,6 +1,6 @@
 package me.earth.headlessmc.mc.gui;
 
-import me.earth.headlessmc.api.HasId;
+import me.earth.headlessmc.mc.util.HasId;
 import me.earth.headlessmc.mc.Adapter;
 
 import java.util.Collections;

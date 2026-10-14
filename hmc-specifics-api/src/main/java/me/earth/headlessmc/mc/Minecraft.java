@@ -76,7 +76,6 @@ public interface Minecraft extends SchedulesTasks, Adapter {
      *
      * @param line the command to complete.
      * @see me.earth.headlessmc.mc.brigadier.BrigadierSuggestionsProvider
-     * @see me.earth.headlessmc.api.command.Command#getCompletions(String, List, String...)
      * @return the completions for the given command.
      */
     default List<Map.Entry<String, String>> getCompletions(String line) {

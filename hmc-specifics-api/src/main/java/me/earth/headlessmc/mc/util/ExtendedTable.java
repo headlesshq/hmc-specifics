@@ -1,22 +1,34 @@
 package me.earth.headlessmc.mc.util;
 
-import me.earth.headlessmc.api.util.Table;
-
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class ExtendedTable<T> extends Table<T> {
-    public ExtendedTable<T> withColumn(String name,
-                                       Function<T, String> column) {
-        super.withColumn(name, column);
+/**
+ * Assists with building aligned tables.
+ *
+ * @param <T> the type of the objects used to create the table.
+ */
+public class ExtendedTable<T> {
+    protected final List<Column<T>> columns = new ArrayList<>();
+    protected final List<T> elements = new ArrayList<>();
+
+    public ExtendedTable<T> withColumn(String name, Function<T, String> column) {
+        columns.add(new Column<>(name, column));
+        return this;
+    }
+
+    @SafeVarargs
+    public final ExtendedTable<T> add(T... elements) {
+        this.elements.addAll(Arrays.asList(elements));
         return this;
     }
 
     public ExtendedTable<T> addAll(Iterable<T> elements) {
-        super.addAll(elements);
+        elements.forEach(this.elements::add);
         return this;
     }
 
@@ -43,8 +55,15 @@ public class ExtendedTable<T> extends Table<T> {
         return this;
     }
 
-    // would be nice if we could just override String.getLength from Table instead of having to copy the build methods
+    public String build() {
+        return build(String::length);
+    }
+
     public String buildCalculatingAnsiWidth() {
+        return build(ExtendedTable::getLengthWithoutAnsi);
+    }
+
+    private String build(Function<String, Integer> length) {
         List<Integer> columnWidths = new ArrayList<>(this.columns.size());
         List<List<String>> columns = this.columns.stream().map(e -> {
             List<String> entries = this.elements.isEmpty()
@@ -56,16 +75,13 @@ public class ExtendedTable<T> extends Table<T> {
             entries.add(0, String.valueOf(e.name));
             // let's hope the Terminal uses a fixed-width font
             columnWidths.add(entries.stream()
-                    .map(ExtendedTable::getLengthWithoutAnsi)
+                    .map(length)
                     .max(Integer::compareTo)
                     .get());
 
             return entries;
         }).collect(Collectors.toList());
-        return buildWithoutAnsiLength(columns, columnWidths);
-    }
 
-    private String buildWithoutAnsiLength(List<List<String>> columns, List<Integer> columnWidths) {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; !columns.isEmpty() && i < columns.get(0).size(); i++) {
             for (int j = 0; j < columns.size(); j++) {
@@ -77,7 +93,7 @@ public class ExtendedTable<T> extends Table<T> {
                     continue;
                 }
 
-                for (int k = 0; k < width - getLengthWithoutAnsi(entry) + 3; k++) {
+                for (int k = 0; k < width - length.apply(entry) + 3; k++) {
                     builder.append(' ');
                 }
             }
@@ -97,6 +113,16 @@ public class ExtendedTable<T> extends Table<T> {
 
     public static String stripAnsi(String string) {
         return string.replaceAll("\u001B\\[[;\\d]*m", "");
+    }
+
+    protected static class Column<T> {
+        public final Function<T, String> function;
+        public final String name;
+
+        public Column(String name, Function<T, String> function) {
+            this.function = function;
+            this.name = name;
+        }
     }
 
 }

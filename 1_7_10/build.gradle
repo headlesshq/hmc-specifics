@@ -59,6 +59,11 @@ repositories {
         name 'SuperDirMaven'
         url new File(layout.projectDirectory.asFile.getParent() + "/libs").toURI().toURL().toString()
     }
+    maven {
+        // HeadlessMC v3 is not released yet, see the publishHeadlessMcV3 task of hmc-specifics-api
+        name 'HeadlessMcV3Maven'
+        url new File(layout.projectDirectory.asFile.getParent() + "/HeadlessMC/headlessmc-code/build/maven").toURI().toURL().toString()
+    }
 
     mavenCentral()
 }
@@ -128,9 +133,7 @@ dependencies {
     }
 
     jarLibs project(':hmc-specifics-api')
-    jarLibs "me.earth.headlessmc:headlessmc-api:${project(':hmc-specifics-api').headlessmc_version}"
-    jarLibs "me.earth.headlessmc:headlessmc-jline:${project(':hmc-specifics-api').headlessmc_version}"
-    jarLibs "me.earth.headlessmc:headlessmc-runtime:${project(':hmc-specifics-api').headlessmc_version}"
+    jarLibs project(path: ':hmc-specifics-api', configuration: 'jline3Bundle')
 }
 
 for (String platform_capitalized : ['Fabric', 'Lexforge']) {

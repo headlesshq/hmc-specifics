@@ -39,6 +39,11 @@ repositories {
     maven {
         url "https://libraries.minecraft.net"
     }
+    maven {
+        // HeadlessMC v3 is not released yet, publish HeadlessMC/headlessmc-code with the publishHeadlessMcV3 task
+        name 'HeadlessMcV3Maven'
+        url new File(layout.projectDirectory.asFile.getParent() + "/HeadlessMC/headlessmc-code/build/maven").toURI().toURL().toString()
+    }
 }
 
 try {
@@ -57,6 +62,80 @@ compileJava {
 java {
     withSourcesJar()
     withJavadocJar()
+}
+
+// JLine 4 requires Java 11, the legacy version projects might build with Java 8
+def canBuildJline4 = JavaVersion.current().isJava11Compatible()
+
+// The jline3 and jline4 source sets compile the same sources (src/jline/java) against JLine 3 and JLine 4.
+// They are packaged together with JLine into a bundle jar, which version projects can add to their jarLibs.
+// At runtime the bundle is loaded on an isolated classloader, see me.earth.headlessmc.mc.console.JlineConsoleLoader.
+sourceSets {
+    jline3 {
+        java.srcDirs = ['src/jline/java']
+    }
+
+    jline4 {
+        java.srcDirs = ['src/jline/java']
+    }
+}
+
+configurations {
+    jline3Lib { transitive = false }
+    jline4Lib { transitive = false }
+    jline3CompileOnly.extendsFrom jline3Lib
+    jline4CompileOnly.extendsFrom jline4Lib
+    jline3Bundle {
+        canBeConsumed = true
+        canBeResolved = false
+    }
+    jline4Bundle {
+        canBeConsumed = true
+        canBeResolved = false
+    }
+}
+
+compileJline3Java {
+    if (JavaVersion.current().ordinal() > JavaVersion.VERSION_1_8.ordinal()) {
+        options.release = 8
+    }
+}
+
+compileJline4Java {
+    options.release = 11 // JLine 4 requires Java 11
+}
+
+for (String jline : ['jline3', 'jline4']) {
+    String name = jline
+    SourceSet sourceSet = sourceSets.getByName(name)
+    def implJar = tasks.register("${name}ImplJar", Jar) {
+        archiveClassifier = "${name}-impl"
+        from sourceSet.output
+    }
+
+    def indexTask = tasks.register("${name}BundleIndex") {
+        def lib = configurations.getByName("${name}Lib")
+        def output = layout.buildDirectory.file("${name}-bundle-index/index.txt")
+        inputs.files(lib)
+        outputs.file(output)
+        doLast {
+            def names = ['hmc-specifics-jline.jar'] + lib.files.collect { it.name }
+            output.get().asFile.text = names.join('\n') + '\n'
+        }
+    }
+
+    def bundleJar = tasks.register("${name}BundleJar", Jar) {
+        archiveClassifier = "${name}-bundle"
+        into('META-INF/hmc-specifics/jline') {
+            from(implJar) {
+                rename { 'hmc-specifics-jline.jar' }
+            }
+            from(configurations.getByName("${name}Lib"))
+            from(indexTask)
+        }
+    }
+
+    artifacts.add("${name}Bundle", bundleJar)
 }
 
 dependencies {
@@ -79,19 +158,31 @@ dependencies {
     //compileOnly 'org.apache.logging.log4j:log4j-api:2.0-beta9' // for testing compatibility with the 1.7.10 version
     //compileOnly 'org.apache.logging.log4j:log4j-core:2.0-beta9' // for testing compatibility with the 1.7.10 version
 
-    implementation "me.earth.headlessmc:headlessmc-runtime:${headlessmc_version}"
-    implementation "me.earth.headlessmc:headlessmc-auth:${headlessmc_version}"
-    implementation "me.earth.headlessmc:headlessmc-jline:${headlessmc_version}"
+    implementation "io.github.headlesshq:headlessmc-console"
+    implementation "io.github.headlesshq:headlessmc-exceptions:${headlessmc_version}"
+    implementation "io.github.headlesshq:headlessmc-console:${headlessmc_version}"
+    implementation "io.github.headlesshq:headlessmc-console-format:${headlessmc_version}"
+    implementation "io.github.headlesshq:headlessmc-console-completions:${headlessmc_version}"
+    implementation "io.github.headlesshq:headlessmc-auth:${headlessmc_version}"
+    implementation "io.github.headlesshq:headlessmc-auth-all:${headlessmc_version}"
+    implementation "io.github.headlesshq:headlessmc-auth-impl:${headlessmc_version}"
+    implementation "io.github.headlesshq:headlessmc-auth-offline:${headlessmc_version}"
+    implementation "io.github.headlesshq:headlessmc-auth-store-gson:${headlessmc_version}"
+    implementation "io.github.headlesshq:headlessmc-commands-auth:${headlessmc_version}"
+    implementation "info.picocli:picocli:${picocli_version}"
 
     implementation 'net.kyori:adventure-text-serializer-ansi:4.17.0'
     implementation 'net.kyori:adventure-text-serializer-gson:4.17.0'
     implementation 'net.kyori:adventure-text-serializer-legacy:4.17.0'
 
-    implementation 'org.jline:jline:3.26.3'
+    jline3Lib "org.jline:jline:${jline3_version}"
+    jline4Lib "org.jline:jline:${jline4_version}"
+    jline3CompileOnly "io.github.headlesshq:headlessmc-console:${headlessmc_version}"
+    jline4CompileOnly "io.github.headlesshq:headlessmc-console:${headlessmc_version}"
 
-    testImplementation("me.earth.headlessmc:headlessmc-api:${headlessmc_version}:test-fixtures")
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.9.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.9.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
     testImplementation 'com.mojang:brigadier:1.0.17' // old version for testing
     // testImplementation 'com.mojang:brigadier:1.2.9' // new version for testing
@@ -99,6 +190,10 @@ dependencies {
 
 test {
     useJUnitPlatform()
+    for (String jline : canBuildJline4 ? ['jline3', 'jline4'] : ['jline3']) {
+        dependsOn("${jline}BundleJar")
+        systemProperty "hmc.test.${jline}.bundle", tasks.named("${jline}BundleJar").get().archiveFile.get().asFile.absolutePath
+    }
 }
 
 publishing {
@@ -148,4 +243,14 @@ publish {
     dependsOn(javadocJar)
     dependsOn(sourcesJar)
     dependsOn(build)
+}
+
+// HeadlessMC v3 is not released yet. This publishes the Java 8 modules listed in headlessmc-v3-modules.txt
+// from HeadlessMC/headlessmc-code into HeadlessMC/headlessmc-code/build/maven (requires Java 25).
+tasks.register('publishHeadlessMcV3', Exec) {
+    group = 'publishing'
+    workingDir new File(layout.projectDirectory.asFile.getParentFile(), 'HeadlessMC/headlessmc-code')
+    def gradlew = System.getProperty('os.name').toLowerCase().contains('windows') ? 'gradlew.bat' : './gradlew'
+    def modules = file('headlessmc-v3-modules.txt').readLines().findAll { !it.trim().isEmpty() }
+    commandLine([gradlew] + modules.collect { "${it.trim()}:publish".toString() })
 }

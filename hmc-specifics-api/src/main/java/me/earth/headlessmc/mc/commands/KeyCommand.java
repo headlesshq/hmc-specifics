@@ -1,42 +1,69 @@
 package me.earth.headlessmc.mc.commands;
 
-import me.earth.headlessmc.api.HasId;
-import me.earth.headlessmc.api.HasName;
-import me.earth.headlessmc.api.HeadlessMc;
-import me.earth.headlessmc.api.command.CommandException;
-import me.earth.headlessmc.api.command.CommandUtil;
-import me.earth.headlessmc.api.command.ParseUtil;
-import me.earth.headlessmc.mc.Minecraft;
 import me.earth.headlessmc.mc.keyboard.HmcKeyboard;
 import me.earth.headlessmc.mc.keyboard.Key;
 import me.earth.headlessmc.mc.keyboard.Keyboard;
 import me.earth.headlessmc.mc.keyboard.RobotKeyboard;
 import me.earth.headlessmc.mc.util.ExtendedTable;
+import me.earth.headlessmc.mc.util.HasId;
+import me.earth.headlessmc.mc.util.HasName;
+import picocli.CommandLine;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+@CommandLine.Command(
+    name = "key",
+    description = "Allows you to press keys.",
+    customSynopsis = "key [<name>] [-id] [-robot] [-robot-list] [-release] [-indefinite] [--duration <ms>]%n" +
+        "   or: key <name> <id> <scancode> -custom"
+)
 public class KeyCommand extends AbstractMinecraftCommand implements ScheduledCommand {
-    private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor(r -> {
+    private static final ScheduledExecutorService EXECUTOR = Executors.newSingleThreadScheduledExecutor(r -> {
         Thread thread = new Thread(r);
         thread.setName("KeyCommand-Thread");
         thread.setDaemon(true);
         return thread;
     });
 
-    public KeyCommand(HeadlessMc ctx, Minecraft mc) {
-        super(ctx, mc, "key", "Allows you to press keys.");
+    @CommandLine.Parameters(arity = "0..3", paramLabel = "<key>", description = "The name (or id with -id) of the key to press. Lists all keys if not specified.")
+    private List<String> params = new ArrayList<>();
+
+    @CommandLine.Option(names = "-robot", description = "Uses java.awt.Robot to press the key.")
+    private boolean robot;
+
+    @CommandLine.Option(names = "-robot-list", description = "Lists the keys of java.awt.Robot.")
+    private boolean robotList;
+
+    @CommandLine.Option(names = "-custom", description = "Presses a key with a custom name, id and scancode.")
+    private boolean custom;
+
+    @CommandLine.Option(names = "-id", description = "Finds the key by its id instead of its name.")
+    private boolean id;
+
+    @CommandLine.Option(names = "--duration", paramLabel = "<ms>", description = "How long to press the key, 80ms by default.")
+    private long duration = 80;
+
+    @CommandLine.Option(names = "-indefinite", description = "Does not release the key.")
+    private boolean indefinite;
+
+    @CommandLine.Option(names = "-release", description = "Releases the key.")
+    private boolean release;
+
+    public KeyCommand(MinecraftContext ctx) {
+        super(ctx);
     }
 
     @Override
-    public void execute(String line, String... args) throws CommandException {
-        Keyboard keyboard = CommandUtil.hasFlag("-robot", args)
-                                || CommandUtil.hasFlag("-robot-list", args)
+    protected void execute() throws CommandException {
+        Keyboard keyboard = robot || robotList
                 ? new RobotKeyboard()
                 : HmcKeyboard.getInstance().getMcKeyboard(mc);
 
-        if (args.length <= 1 || CommandUtil.hasFlag("-robot-list", args)) {
+        if (params.isEmpty() || robotList) {
             ctx.log(new ExtendedTable<Key>()
                     .addAll(keyboard)
                     .withInt("id", Key::getId)
@@ -46,29 +73,26 @@ public class KeyCommand extends AbstractMinecraftCommand implements ScheduledCom
         }
 
         Key key;
-        if (CommandUtil.hasFlag("-custom", args)) {
-            if (args.length < 4) {
+        if (custom) {
+            if (params.size() < 3) {
                 throw new CommandException("Please specify name, id, and scancode.");
             }
 
-            String name = args[1];
-            int id = ParseUtil.parseI(args[2]);
-            int scanCode = ParseUtil.parseI(args[3]);
-            key = new Key(name, id, scanCode);
+            key = new Key(params.get(0), parseInt(params.get(1)), parseInt(params.get(2)));
         } else {
-            key = CommandUtil.hasFlag("-id", args)
-                    ? HasId.getById(ParseUtil.parseI(args[1]), keyboard)
-                    : HasName.getByName(args[1], keyboard);
+            key = id
+                    ? HasId.getById(parseInt(params.get(0)), keyboard)
+                    : HasName.getByName(params.get(0), keyboard);
         }
 
         if (key == null) {
-            throw new CommandException("Failed to find key: " + args[1]);
+            throw new CommandException("Failed to find key: " + params.get(0));
         }
 
-        String durationArg = CommandUtil.getOption("--duration", args);
-        boolean indefinite = CommandUtil.hasFlag("-indefinite", args);
-        long duration = durationArg == null ? 80 : ParseUtil.parseL(durationArg, 0, Long.MAX_VALUE);
-        boolean release = CommandUtil.hasFlag("-release", args);
+        if (duration < 0) {
+            throw new CommandException("Duration must be >= 0!");
+        }
+
         if (release) {
             keyboard.release(key);
         } else {
@@ -76,9 +100,17 @@ public class KeyCommand extends AbstractMinecraftCommand implements ScheduledCom
         }
 
         if (!indefinite && !release) {
-            executor.schedule(() -> {
+            EXECUTOR.schedule(() -> {
                 mc.schedule(() -> keyboard.release(key));
             }, duration, TimeUnit.MILLISECONDS);
+        }
+    }
+
+    private static int parseInt(String value) throws CommandException {
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            throw new CommandException("Failed to parse '" + value + "' as a number!");
         }
     }
 
