@@ -30,9 +30,19 @@ public abstract class MixinGuiScreen implements GuiScreen {
     @Shadow
     protected List<net.minecraft.client.gui.GuiButton> buttonList;
 
-    @Override
     @Invoker("mouseClicked")
-    public abstract void click(int x, int y, int button);
+    public abstract void hmc$mouseClicked(int x, int y, int button);
+
+    @Invoker("mouseReleased")
+    public abstract void hmc$mouseReleased(int x, int y, int button);
+
+    @Override
+    public void click(int x, int y, int button) {
+        hmc$mouseClicked(x, y, button);
+        // A container screen puts the carried stack down on release, so a click
+        // without it picks a stack up and leaves it on the cursor.
+        hmc$mouseReleased(x, y, button);
+    }
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void initHook(CallbackInfo ci) {

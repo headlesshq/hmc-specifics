@@ -46,6 +46,9 @@ public abstract class MixinScreen implements GuiScreen, GuiEventListener {
     @Override
     public void click(int x, int y, int button) {
         mouseClicked(x, y, button);
+        // A container screen puts the carried stack down on release, so a click
+        // without it picks a stack up and leaves it on the cursor.
+        mouseReleased(x, y, button);
     }
 
     @Override
