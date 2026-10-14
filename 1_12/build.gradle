@@ -139,6 +139,7 @@ dependencies {
     }
 
     jarLibs project(':hmc-specifics-api')
+    jarLibs project(':hmc-specifics-tweaker')
     jarLibs project(path: ':hmc-specifics-api', configuration: 'jline3Bundle')
 }
 

@@ -11,7 +11,6 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import joptsimple.internal.Strings;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -151,7 +150,7 @@ public class BrigadierSuggestionsProvider<T> {
     }
 
     private static int getLastWordIndex(String string) {
-        if (Strings.isNullOrEmpty(string)) {
+        if (string == null || string.isEmpty()) {
             return 0;
         } else {
             int i = 0;

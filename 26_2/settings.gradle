@@ -29,5 +29,9 @@ pluginManagement {
 
 include 'hmc-specifics-api'
 project(':hmc-specifics-api').projectDir = file('../hmc-specifics-api')
+include 'hmc-specifics-brigadier'
+project(':hmc-specifics-brigadier').projectDir = file('../hmc-specifics-brigadier')
+include 'hmc-specifics-tweaker'
+project(':hmc-specifics-tweaker').projectDir = file('../hmc-specifics-tweaker')
 
 rootProject.name = "hmc-specifics-${minecraft_version}"

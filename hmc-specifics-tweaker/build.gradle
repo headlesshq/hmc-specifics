@@ -1,0 +1,50 @@
+plugins {
+    id 'java'
+}
+
+// Mixin, LaunchWrapper and SimpleTweaker are not on Maven Central, so this lives outside of hmc-specifics-api.
+// It is not a standalone build, version projects include it next to hmc-specifics-api.
+
+group 'me.earth.headlessmc'
+version "${project(':hmc-specifics-api').project_version}"
+
+repositories {
+    mavenCentral()
+    maven {
+        name = "sponge"
+        url = "https://repo.spongepowered.org/maven"
+    }
+    maven {
+        name = "impactdevelopment-repo"
+        url = "https://impactdevelopment.github.io/maven/"
+    }
+    maven {
+        name "JitPackMaven"
+        url "https://jitpack.io"
+    }
+    maven {
+        url "https://libraries.minecraft.net"
+    }
+}
+
+try {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+} catch (ignored) { // gradle 9
+
+}
+
+compileJava {
+    if (JavaVersion.current().ordinal() > JavaVersion.VERSION_1_8.ordinal()) {
+        options.compilerArgs.addAll(['--release', '8'])
+    }
+}
+
+dependencies {
+    compileOnly 'org.spongepowered:mixin:0.8.5'
+    compileOnly 'com.github.ImpactDevelopment:SimpleTweaker:1.2'
+    compileOnly ('net.minecraft:launchwrapper:1.12') {
+        exclude module: 'log4j-api'
+        exclude module: 'log4j-core'
+    }
+}
