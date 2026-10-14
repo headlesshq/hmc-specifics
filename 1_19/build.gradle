@@ -132,7 +132,6 @@ for (String platform_capitalized : ['Fabric', 'Lexforge']) {
             it.configurations += [ project.configurations.forgeJarLibs ]
             it.dependencies {
                 exclude(dependency('com.google.errorprone:error_prone_annotations:.*'))
-                exclude(dependency('com.google.code.gson:gson:.*'))
                 exclude(dependency('net.java.dev.jna:jna:.*'))
                 exclude(dependency('net.java.dev.jna:jna:.*'))
                 exclude(dependency('org.slf4j:slf4j-api:.*'))
@@ -273,4 +272,10 @@ sourceSets {
 
 test {
     useJUnitPlatform()
+}
+
+// Older versions of Minecraft ship gson versions that are too old for our dependencies (MinecraftAuth, HeadlessMC auth).
+// So we ship our own gson and relocate it. Version specific code must not reference Minecraft's gson classes.
+tasks.withType(ShadowJar).configureEach {
+    relocate 'com.google.gson', 'me.earth.headlessmc.mc.shadow.gson'
 }

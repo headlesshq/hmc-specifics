@@ -16,7 +16,7 @@ public class AdventureHelperTest {
         String json = "{\"text\":\"\",\"extra\":[{\"translate\":\"item.minecraft.diamond_sword\"}],\"color\":\"aqua\"}";
         AdventureHelper helper = AdventureWrapper.getAdventureHelper(s -> false, (s, s2) -> s);
         assertNotNull(helper);
-        String ansiString = helper.toAnsiString(json);
+        String ansiString = helper.toAnsiStringJson(json);
         assertEquals("\u001B[m\u001B[96mitem.minecraft.diamond_sword\u001B[0m", ansiString);
 
         ExtendedTable<String> table = new ExtendedTable<String>()

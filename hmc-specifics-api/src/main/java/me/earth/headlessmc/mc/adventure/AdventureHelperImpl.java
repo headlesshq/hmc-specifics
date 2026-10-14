@@ -1,7 +1,6 @@
 package me.earth.headlessmc.mc.adventure;
 
 
-import com.google.gson.JsonElement;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.TranslationArgument;
@@ -102,14 +101,8 @@ public class AdventureHelperImpl implements AdventureHelper {
     }
 
     @Override
-    public String toAnsiString(String json) {
-        Component jsonComponent = GsonComponentSerializer.gson().deserialize(json);
-        return "\u001B[m" + ansiSerializer.serialize(jsonComponent);
-    }
-
-    @Override
-    public String toAnsiString(JsonElement json) {
-        Component jsonComponent = GsonComponentSerializer.gson().deserializeFromTree(json);
+    public String toAnsiStringJson(String jsonString) {
+        Component jsonComponent = GsonComponentSerializer.gson().deserialize(jsonString);
         return "\u001B[m" + ansiSerializer.serialize(jsonComponent);
     }
 
