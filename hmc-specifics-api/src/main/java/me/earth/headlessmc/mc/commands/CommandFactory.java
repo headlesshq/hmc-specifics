@@ -1,32 +1,29 @@
 package me.earth.headlessmc.mc.commands;
 
-import io.github.headlesshq.headlessmc.auth.AuthService;
-import picocli.CommandLine;
-
-import java.lang.reflect.Constructor;
-
 /**
- * HeadlessMC creates commands and completion candidates with CDI.
- * We do not have CDI, so this factory supplies the {@link AuthService}
- * to classes that require it, e.g. {@code AccountCompletions}.
+ * Creates instances of a class that picocli needs, e.g. a command, a subcommand or {@code completionCandidates}.
+ * Most classes do not need a factory: classes with a constructor that takes a {@link MinecraftContext}
+ * or with a no-arg constructor are instantiated automatically.
+ * Factories are loaded with a {@link java.util.ServiceLoader},
+ * register them in {@code META-INF/services/me.earth.headlessmc.mc.commands.CommandFactory}.
+ *
+ * @param <T> the type of the instances created by this factory.
+ * @see CommandRegistry
  */
-public class CommandFactory implements CommandLine.IFactory {
-    private final CommandLine.IFactory defaultFactory = CommandLine.defaultFactory();
-    private final AuthService authService;
+public interface CommandFactory<T> {
+    /**
+     * @return the class this factory creates instances of.
+     */
+    Class<T> getType();
 
-    public CommandFactory(AuthService authService) {
-        this.authService = authService;
-    }
-
-    @Override
-    public <K> K create(Class<K> cls) throws Exception {
-        try {
-            Constructor<K> constructor = cls.getDeclaredConstructor(AuthService.class);
-            constructor.setAccessible(true);
-            return constructor.newInstance(authService);
-        } catch (NoSuchMethodException e) {
-            return defaultFactory.create(cls);
-        }
-    }
+    /**
+     * Creates a new instance. Called every time a command is executed or completed,
+     * because picocli stores the parsed arguments inside the command objects.
+     *
+     * @param ctx the context to get dependencies from.
+     * @return a new instance of {@link #getType()}.
+     * @throws Exception if the instance could not be created.
+     */
+    T create(MinecraftContext ctx) throws Exception;
 
 }

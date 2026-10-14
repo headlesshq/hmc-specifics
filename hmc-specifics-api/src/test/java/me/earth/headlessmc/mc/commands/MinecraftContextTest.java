@@ -111,6 +111,26 @@ public class MinecraftContextTest {
     }
 
     @Test
+    public void testExternalCommands() {
+        ctx.execute("greet Steve");
+        assertEquals("Hello Steve", console.joined());
+
+        console.output.clear();
+        ctx.execute("account info");
+        assertEquals("Account info", console.joined());
+
+        // the broken entries in the test commands file are skipped
+        assertTrue(ctx.getCommands().stream().noneMatch(e -> e.getParents().contains("doesnotexist")));
+    }
+
+    @Test
+    public void testAccountCompletionsFactory() throws Exception {
+        PicocliFactory factory = new PicocliFactory(ctx, CommandRegistry.load(getClass().getClassLoader()).getFactories());
+        assertNotNull(factory.create(io.github.headlesshq.headlessmc.commands.auth.AccountCompletions.class));
+        assertNotNull(factory.create(io.github.headlesshq.headlessmc.commands.auth.AuthProviderCompletions.class));
+    }
+
+    @Test
     public void testParseUuid() {
         UUID uuid = UUID.randomUUID();
         assertEquals(uuid, HmcAuth.parseUuid(uuid.toString()));

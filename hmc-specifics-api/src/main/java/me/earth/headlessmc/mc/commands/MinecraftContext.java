@@ -2,14 +2,10 @@ package me.earth.headlessmc.mc.commands;
 
 import io.github.headlesshq.headlessmc.auth.AuthService;
 import io.github.headlesshq.headlessmc.auth.LastUsedAccountService;
-import io.github.headlesshq.headlessmc.commands.auth.AccountCommand;
 import io.github.headlesshq.headlessmc.console.ArgSplitter;
 import io.github.headlesshq.headlessmc.console.Completions;
 import io.github.headlesshq.headlessmc.console.Console;
 import io.github.headlesshq.headlessmc.console.completions.PicocliCompletions;
-import io.github.headlesshq.headlessmc.console.format.SimpleTable;
-import io.github.headlesshq.headlessmc.console.format.TableBuilder;
-import io.github.headlesshq.headlessmc.console.format.TableProvider;
 import io.github.headlesshq.headlessmc.exceptions.HeadlessMcException;
 import me.earth.headlessmc.mc.Minecraft;
 import me.earth.headlessmc.mc.auth.AccountRefreshingService;
@@ -27,6 +23,7 @@ import java.util.logging.Logger;
 
 /**
  * Executes commands on a running Minecraft instance.
+ * The picocli commands are collected by a {@link CommandRegistry}.
  * A new picocli {@link CommandLine} is created for every command, because picocli stores the parsed arguments
  * inside the command objects and {@link ScheduledCommand}s are executed later on the main thread.
  */
@@ -34,6 +31,8 @@ public class MinecraftContext {
     private static final Logger LOGGER = Logger.getLogger(MinecraftContext.class.getName());
 
     private final List<PrefixedCommand> prefixedCommands = new ArrayList<>();
+    private final CommandRegistry commandRegistry;
+    private final List<CommandRegistry.Entry> commands;
     private final AccountRefreshingService accountRefreshingService;
     private final LastUsedAccountService lastUsedAccountService;
     private final AuthService authService;
@@ -56,33 +55,15 @@ public class MinecraftContext {
         prefixedCommands.add(new CommandCommand(this));
         prefixedCommands.add(new MessageCommand(this, ".", "."));
         prefixedCommands.add(new MessageCommand(this, "msg", "msg "));
+        this.commandRegistry = CommandRegistry.load(MinecraftContext.class.getClassLoader());
+        this.commands = validateCommands(commandRegistry.getCommands());
     }
 
     public CommandLine createCommandLine() {
-        CommandFactory factory = new CommandFactory(authService);
-        CommandLine commandLine = new CommandLine(new RootCommand(), factory);
-        commandLine.addSubcommand(new CommandLine.HelpCommand());
-        commandLine.addSubcommand(new QuitCommand(this));
-        commandLine.addSubcommand(new RenderCommand(this));
-        commandLine.addSubcommand(new ClickCommand(this));
-        commandLine.addSubcommand(new GuiCommand(this));
-        commandLine.addSubcommand(new TextCommand(this));
-        commandLine.addSubcommand(new CloseCommand(this));
-        commandLine.addSubcommand(new MenuCommand(this));
-        commandLine.addSubcommand(new MemoryCommand(this));
-        commandLine.addSubcommand(new ConnectCommand(this));
-        commandLine.addSubcommand(new DisconnectCommand(this));
-        commandLine.addSubcommand(new KeyCommand(this));
-
-        AccountCommand accountCommand = new AccountCommand(
-            lastUsedAccountService, new SimpleTableProvider(), authService, console
-        );
-
-        CommandLine account = new CommandLine(accountCommand, factory);
-        account.addSubcommand(new CurrentAccountCommand(this));
-        account.addSubcommand(new TokenAccountCommand(this));
-        account.addSubcommand(new AutoRefreshCommand(this));
-        commandLine.addSubcommand(account);
+        CommandLine commandLine = createRootCommandLine();
+        for (CommandRegistry.Entry command : commands) {
+            addCommand(commandLine, command);
+        }
 
         commandLine.setSubcommandsCaseInsensitive(true);
         PrintWriter writer = new PrintWriter(new ConsoleWriter(console), true);
@@ -163,8 +144,55 @@ public class MinecraftContext {
         return accountRefreshingService;
     }
 
+    public AuthService getAuthService() {
+        return authService;
+    }
+
+    public LastUsedAccountService getLastUsedAccountService() {
+        return lastUsedAccountService;
+    }
+
+    public List<CommandRegistry.Entry> getCommands() {
+        return commands;
+    }
+
     public List<PrefixedCommand> getPrefixedCommands() {
         return Collections.unmodifiableList(prefixedCommands);
+    }
+
+    private CommandLine createRootCommandLine() {
+        return new CommandLine(new RootCommand(), new PicocliFactory(this, commandRegistry.getFactories()));
+    }
+
+    /**
+     * Adds every command once, so that commands which can not be instantiated
+     * or whose names clash with other commands are only reported once, at startup.
+     */
+    private List<CommandRegistry.Entry> validateCommands(List<CommandRegistry.Entry> entries) {
+        List<CommandRegistry.Entry> result = new ArrayList<>();
+        CommandLine commandLine = createRootCommandLine();
+        for (CommandRegistry.Entry entry : entries) {
+            try {
+                addCommand(commandLine, entry);
+                result.add(entry);
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Failed to register command " + entry, e);
+            }
+        }
+
+        return result;
+    }
+
+    private void addCommand(CommandLine root, CommandRegistry.Entry entry) {
+        CommandLine parent = root;
+        for (String name : entry.getParents()) {
+            parent = parent.getSubcommands().get(name);
+            if (parent == null) {
+                throw new IllegalArgumentException("Failed to find parent command '" + name + "' for " + entry);
+            }
+        }
+
+        parent.addSubcommand(entry.getType());
     }
 
     private void execute(CommandLine.ParseResult parseResult) {
@@ -206,13 +234,6 @@ public class MinecraftContext {
         @Override
         public void run() {
             // NOP
-        }
-    }
-
-    private static final class SimpleTableProvider implements TableProvider {
-        @Override
-        public <T> TableBuilder<T> get() {
-            return new SimpleTable<>();
         }
     }
 
