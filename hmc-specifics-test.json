@@ -751,8 +751,59 @@
           "message": "Minecraft is currently not displaying a Gui.",
           "then": [
             {
-              "type": "WAIT",
-              "timeout": 10
+              "type": "SEND",
+              "message": "hmcs-test sleep 10"
+            },
+            {
+              "type": "ENDS_WITH",
+              "message": "[hmcs-test] Slept 10s.",
+              "or": [
+                {
+                  "type": "REGEX",
+                  "message": ".*Failed to (load|register) command (?!.*(DoesNotExist|doesnotexist)).*",
+                  "then": [
+                    {
+                      "type": "FAIL"
+                    }
+                  ]
+                },
+                {
+                  "type": "CONTAINS",
+                  "message": "Failed to load JLine ArgSplitter",
+                  "then": [
+                    {
+                      "type": "FAIL"
+                    }
+                  ]
+                },
+                {
+                  "type": "CONTAINS",
+                  "message": "An error occurred: ",
+                  "then": [
+                    {
+                      "type": "FAIL"
+                    }
+                  ]
+                },
+                {
+                  "type": "CONTAINS",
+                  "message": "Command failed",
+                  "then": [
+                    {
+                      "type": "FAIL"
+                    }
+                  ]
+                },
+                {
+                  "type": "CONTAINS",
+                  "message": "Couldn't find command for",
+                  "then": [
+                    {
+                      "type": "FAIL"
+                    }
+                  ]
+                }
+              ]
             },
             {
               "type": "SEND",
@@ -767,8 +818,59 @@
                   "message": "Minecraft is currently not displaying a Gui.",
                   "then": [
                     {
-                      "type": "WAIT",
-                      "timeout": 10
+                      "type": "SEND",
+                      "message": "hmcs-test sleep 10"
+                    },
+                    {
+                      "type": "ENDS_WITH",
+                      "message": "[hmcs-test] Slept 10s.",
+                      "or": [
+                        {
+                          "type": "REGEX",
+                          "message": ".*Failed to (load|register) command (?!.*(DoesNotExist|doesnotexist)).*",
+                          "then": [
+                            {
+                              "type": "FAIL"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "CONTAINS",
+                          "message": "Failed to load JLine ArgSplitter",
+                          "then": [
+                            {
+                              "type": "FAIL"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "CONTAINS",
+                          "message": "An error occurred: ",
+                          "then": [
+                            {
+                              "type": "FAIL"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "CONTAINS",
+                          "message": "Command failed",
+                          "then": [
+                            {
+                              "type": "FAIL"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "CONTAINS",
+                          "message": "Couldn't find command for",
+                          "then": [
+                            {
+                              "type": "FAIL"
+                            }
+                          ]
+                        }
+                      ]
                     },
                     {
                       "type": "SEND",
@@ -783,8 +885,59 @@
                           "message": "Minecraft is currently not displaying a Gui.",
                           "then": [
                             {
-                              "type": "WAIT",
-                              "timeout": 10
+                              "type": "SEND",
+                              "message": "hmcs-test sleep 10"
+                            },
+                            {
+                              "type": "ENDS_WITH",
+                              "message": "[hmcs-test] Slept 10s.",
+                              "or": [
+                                {
+                                  "type": "REGEX",
+                                  "message": ".*Failed to (load|register) command (?!.*(DoesNotExist|doesnotexist)).*",
+                                  "then": [
+                                    {
+                                      "type": "FAIL"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "CONTAINS",
+                                  "message": "Failed to load JLine ArgSplitter",
+                                  "then": [
+                                    {
+                                      "type": "FAIL"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "CONTAINS",
+                                  "message": "An error occurred: ",
+                                  "then": [
+                                    {
+                                      "type": "FAIL"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "CONTAINS",
+                                  "message": "Command failed",
+                                  "then": [
+                                    {
+                                      "type": "FAIL"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "CONTAINS",
+                                  "message": "Couldn't find command for",
+                                  "then": [
+                                    {
+                                      "type": "FAIL"
+                                    }
+                                  ]
+                                }
+                              ]
                             },
                             {
                               "type": "SEND",
@@ -799,8 +952,59 @@
                                   "message": "Minecraft is currently not displaying a Gui.",
                                   "then": [
                                     {
-                                      "type": "WAIT",
-                                      "timeout": 10
+                                      "type": "SEND",
+                                      "message": "hmcs-test sleep 10"
+                                    },
+                                    {
+                                      "type": "ENDS_WITH",
+                                      "message": "[hmcs-test] Slept 10s.",
+                                      "or": [
+                                        {
+                                          "type": "REGEX",
+                                          "message": ".*Failed to (load|register) command (?!.*(DoesNotExist|doesnotexist)).*",
+                                          "then": [
+                                            {
+                                              "type": "FAIL"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "type": "CONTAINS",
+                                          "message": "Failed to load JLine ArgSplitter",
+                                          "then": [
+                                            {
+                                              "type": "FAIL"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "type": "CONTAINS",
+                                          "message": "An error occurred: ",
+                                          "then": [
+                                            {
+                                              "type": "FAIL"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "type": "CONTAINS",
+                                          "message": "Command failed",
+                                          "then": [
+                                            {
+                                              "type": "FAIL"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "type": "CONTAINS",
+                                          "message": "Couldn't find command for",
+                                          "then": [
+                                            {
+                                              "type": "FAIL"
+                                            }
+                                          ]
+                                        }
+                                      ]
                                     },
                                     {
                                       "type": "SEND",
@@ -815,8 +1019,59 @@
                                           "message": "Minecraft is currently not displaying a Gui.",
                                           "then": [
                                             {
-                                              "type": "WAIT",
-                                              "timeout": 10
+                                              "type": "SEND",
+                                              "message": "hmcs-test sleep 10"
+                                            },
+                                            {
+                                              "type": "ENDS_WITH",
+                                              "message": "[hmcs-test] Slept 10s.",
+                                              "or": [
+                                                {
+                                                  "type": "REGEX",
+                                                  "message": ".*Failed to (load|register) command (?!.*(DoesNotExist|doesnotexist)).*",
+                                                  "then": [
+                                                    {
+                                                      "type": "FAIL"
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "type": "CONTAINS",
+                                                  "message": "Failed to load JLine ArgSplitter",
+                                                  "then": [
+                                                    {
+                                                      "type": "FAIL"
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "type": "CONTAINS",
+                                                  "message": "An error occurred: ",
+                                                  "then": [
+                                                    {
+                                                      "type": "FAIL"
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "type": "CONTAINS",
+                                                  "message": "Command failed",
+                                                  "then": [
+                                                    {
+                                                      "type": "FAIL"
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "type": "CONTAINS",
+                                                  "message": "Couldn't find command for",
+                                                  "then": [
+                                                    {
+                                                      "type": "FAIL"
+                                                    }
+                                                  ]
+                                                }
+                                              ]
                                             },
                                             {
                                               "type": "SEND",
@@ -831,8 +1086,59 @@
                                                   "message": "Minecraft is currently not displaying a Gui.",
                                                   "then": [
                                                     {
-                                                      "type": "WAIT",
-                                                      "timeout": 10
+                                                      "type": "SEND",
+                                                      "message": "hmcs-test sleep 10"
+                                                    },
+                                                    {
+                                                      "type": "ENDS_WITH",
+                                                      "message": "[hmcs-test] Slept 10s.",
+                                                      "or": [
+                                                        {
+                                                          "type": "REGEX",
+                                                          "message": ".*Failed to (load|register) command (?!.*(DoesNotExist|doesnotexist)).*",
+                                                          "then": [
+                                                            {
+                                                              "type": "FAIL"
+                                                            }
+                                                          ]
+                                                        },
+                                                        {
+                                                          "type": "CONTAINS",
+                                                          "message": "Failed to load JLine ArgSplitter",
+                                                          "then": [
+                                                            {
+                                                              "type": "FAIL"
+                                                            }
+                                                          ]
+                                                        },
+                                                        {
+                                                          "type": "CONTAINS",
+                                                          "message": "An error occurred: ",
+                                                          "then": [
+                                                            {
+                                                              "type": "FAIL"
+                                                            }
+                                                          ]
+                                                        },
+                                                        {
+                                                          "type": "CONTAINS",
+                                                          "message": "Command failed",
+                                                          "then": [
+                                                            {
+                                                              "type": "FAIL"
+                                                            }
+                                                          ]
+                                                        },
+                                                        {
+                                                          "type": "CONTAINS",
+                                                          "message": "Couldn't find command for",
+                                                          "then": [
+                                                            {
+                                                              "type": "FAIL"
+                                                            }
+                                                          ]
+                                                        }
+                                                      ]
                                                     },
                                                     {
                                                       "type": "SEND",

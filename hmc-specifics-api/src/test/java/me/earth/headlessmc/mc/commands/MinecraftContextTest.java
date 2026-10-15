@@ -134,6 +134,10 @@ public class MinecraftContextTest {
         assertEquals("[hmcs-test] Scheduled command executed.", console.joined());
 
         console.output.clear();
+        ctx.execute("hmcs-test sleep 0");
+        assertEquals("[hmcs-test] Slept 0s.", console.joined());
+
+        console.output.clear();
         ctx.execute("account hmcs-test");
         assertEquals("[hmcs-test] Account subcommand executed.", console.joined());
     }
