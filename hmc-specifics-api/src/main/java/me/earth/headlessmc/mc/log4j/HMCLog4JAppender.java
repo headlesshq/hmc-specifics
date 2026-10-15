@@ -1,7 +1,6 @@
 package me.earth.headlessmc.mc.log4j;
 
-import me.earth.headlessmc.api.classloading.Deencapsulator;
-import me.earth.headlessmc.api.process.InAndOutProvider;
+import io.github.headlesshq.headlessmc.console.Console;
 import net.minecrell.terminalconsole.TerminalConsoleAppender;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -15,15 +14,16 @@ import org.apache.logging.log4j.core.config.plugins.Plugin;
 import org.apache.logging.log4j.core.impl.Log4jContextFactory;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.apache.logging.log4j.spi.LoggerContextFactory;
-import org.jline.terminal.Terminal;
 
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 /**
- * Uses an {@link AppenderPrinter} to always print above the {@link org.jline.reader.LineReader}.
+ * Writes log messages to a HeadlessMC {@link Console}, which prints them above the JLine LineReader.
  * That we we get a persistent input line, even if the program puts out lots of text asynchronously.
  * @see <a href=https://github.com/Minecrell/TerminalConsoleAppender>https://github.com/Minecrell/TerminalConsoleAppender</a>
  */
@@ -32,7 +32,7 @@ import java.util.Optional;
 public class HMCLog4JAppender extends AbstractAppender {
     public static final boolean ANSI_ENABLED = Boolean.parseBoolean(System.getProperty("hmc.log4jappender.ansi", "true"));
     public static final String PLUGIN_NAME = "HMCLog4JAppender";
-    private static final InAndOutProvider SYS_OUT = new InAndOutProvider();
+    private static final PrintStream SYS_ERR = new PrintStream(new FileOutputStream(FileDescriptor.err), true);
 
     private static final String ANSI_RESET = "\u001B[m";
     private static final String ANSI_ERROR = "\u001B[31;1m"; // Bold Red
@@ -41,12 +41,12 @@ public class HMCLog4JAppender extends AbstractAppender {
     private static HMCLog4JAppender instance;
 
     private static final Logger LOGGER = LogManager.getLogger(HMCLog4JAppender.class);
-    private final AppenderPrinter appenderPrinter;
+    private final Console console;
 
     @SuppressWarnings("deprecation") // we need to call the deprecated super-constructor, the non-deprecated one might not exist
-    protected HMCLog4JAppender(String name, Filter filter, Layout<? extends Serializable> layout, boolean ignoreExceptions, AppenderPrinter appenderPrinter) {
+    protected HMCLog4JAppender(String name, Filter filter, Layout<? extends Serializable> layout, boolean ignoreExceptions, Console console) {
         super(name, filter, layout, ignoreExceptions/*, Property.EMPTY_ARRAY*/);
-        this.appenderPrinter = appenderPrinter;
+        this.console = console;
         instance = this;
     }
 
@@ -65,38 +65,37 @@ public class HMCLog4JAppender extends AbstractAppender {
                 }
             }
 
-            appenderPrinter.printAboveLineReader(text);
+            if (text.endsWith(System.lineSeparator())) {
+                console.write(text.substring(0, text.length() - System.lineSeparator().length()));
+            } else if (text.endsWith("\n")) {
+                console.write(text.substring(0, text.length() - 1));
+            } else {
+                console.write(text, "");
+            }
         }
     }
 
-    public AppenderPrinter getAppenderPrinter() {
-        return appenderPrinter;
+    public Console getConsole() {
+        return console;
     }
 
     public static HMCLog4JAppender getInstance() {
         return instance;
     }
 
-    public static void install(Object commandLine) {
-        Deencapsulator deencapsulator = new Deencapsulator();
-        Optional<AppenderPrinter> appenderPrinter = new AppenderPrinter.Factory().getAppenderPrinter(deencapsulator, commandLine);
-        if (!appenderPrinter.isPresent()) {
-            LOGGER.error("Failed to install " + PLUGIN_NAME + ", AppenderPrinter not present");
-            return;
-        }
-
+    public static void install(Console console) {
         LOGGER.info(System.out);
         LOGGER.info(System.out.getClass().getClassLoader());
         LOGGER.info(HMCLog4JAppender.class.getClassLoader());
         LoggerContextFactory logFactory = LogManager.getFactory();
         if (logFactory instanceof Log4jContextFactory) {
-            ((Log4jContextFactory) logFactory).getSelector().getLoggerContexts().forEach(context -> install(context, appenderPrinter.get()));
+            ((Log4jContextFactory) logFactory).getSelector().getLoggerContexts().forEach(context -> install(context, console));
         }
     }
 
     // this is kinda gross and I am not sure what I am doing but it works!
     @SuppressWarnings("RedundantSuppression") // RedundantArrayCreation
-    private static void install(LoggerContext context, AppenderPrinter appenderPrinter) {
+    private static void install(LoggerContext context, Console console) {
         // TODO: it seems that in 1.7.10 there are loggers that we have not installed ourselves on?
         Configuration config = context.getConfiguration();
         LoggerConfig rootLoggerConfig;
@@ -146,7 +145,7 @@ public class HMCLog4JAppender extends AbstractAppender {
             }
 
             // layout = PatternLayout.newBuilder().withPattern("[%d{HH:mm:ss}] [%t/%level] [%logger]: %msg{nolookups}%n").build();
-            HMCLog4JAppender appender = new HMCLog4JAppender(PLUGIN_NAME, null, layout, true, appenderPrinter);
+            HMCLog4JAppender appender = new HMCLog4JAppender(PLUGIN_NAME, null, layout, true, console);
             appender.start();
 
             try {
@@ -158,8 +157,8 @@ public class HMCLog4JAppender extends AbstractAppender {
             rootLoggerConfig.addAppender(appender, Level.INFO, null);
             context.updateLoggers();
         } catch (Throwable throwable) {
-            SYS_OUT.getErr().get().println("Failed to add " + PLUGIN_NAME);
-            throwable.printStackTrace(SYS_OUT.getErr().get());
+            SYS_ERR.println("Failed to add " + PLUGIN_NAME);
+            throwable.printStackTrace(SYS_ERR);
             try {
                 Map<String, Appender> appendersNow = new HashMap<>(config.getAppenders());
                 for (Map.Entry<String, Appender> entry : appenders.entrySet()) {
@@ -170,20 +169,16 @@ public class HMCLog4JAppender extends AbstractAppender {
 
                 context.updateLoggers();
             } catch (Throwable throwable2) {
-                SYS_OUT.getErr().get().println("Failed to reinstall Log4JAppenders");
-                throwable.printStackTrace(SYS_OUT.getErr().get());
+                SYS_ERR.println("Failed to reinstall Log4JAppenders");
+                throwable.printStackTrace(SYS_ERR);
             }
         }
     }
 
     // TODO: it would be even cooler if we could instead make use of the TerminalConsoleAppender terminal?
-    public static void closeTerminalConsoleAppender(Deencapsulator deencapsulator) {
-        //noinspection RedundantSuppression
+    public static void closeTerminalConsoleAppender() {
         try {
-            deencapsulator.deencapsulate(TerminalConsoleAppender.class);
-            Terminal terminal = TerminalConsoleAppender.getTerminal();
-            //noinspection RedundantArrayCreation
-            LOGGER.info("TerminalConsoleAppender Terminal: {} : {}", new Object[]{terminal, (terminal == null ? "null" : terminal.getType())});
+            LOGGER.info("Closing TerminalConsoleAppender");
             TerminalConsoleAppender.close();
         } catch (Throwable t) {
             LOGGER.debug("Failed to close TerminalConsoleAppender", t);

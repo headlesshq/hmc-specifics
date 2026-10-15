@@ -1,29 +1,30 @@
 package me.earth.headlessmc.mc.commands;
 
-import me.earth.headlessmc.api.HeadlessMc;
-import me.earth.headlessmc.api.command.CommandException;
-import me.earth.headlessmc.api.command.CommandUtil;
-import me.earth.headlessmc.mc.Minecraft;
 import me.earth.headlessmc.mc.gui.GuiButton;
 import me.earth.headlessmc.mc.gui.GuiElement;
 import me.earth.headlessmc.mc.gui.GuiScreen;
 import me.earth.headlessmc.mc.gui.TextField;
 import me.earth.headlessmc.mc.util.ExtendedTable;
+import picocli.CommandLine;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-public class GuiCommand extends AbstractGuiCommand
-    implements ScheduledCommand {
-    public GuiCommand(HeadlessMc ctx, Minecraft mc) {
-        super(ctx, mc, "gui", "Dumps the currently displayed screen.");
+@CommandLine.Command(name = "gui", description = "Dumps the currently displayed screen.")
+public class GuiCommand extends AbstractGuiCommand implements ScheduledCommand {
+    @CommandLine.Option(names = "--tooltip", paramLabel = "<id>", description = "Displays the tooltip of the element with the given id.")
+    private String tooltip;
+
+    @CommandLine.Option(names = "-v", description = "Displays the full class names of elements.")
+    private boolean verbose;
+
+    public GuiCommand(MinecraftContext ctx) {
+        super(ctx);
     }
 
     @Override
-    protected void execute(GuiScreen gui, String... args) throws CommandException {
-        String tooltip = CommandUtil.getOption("--tooltip", args);
+    protected void execute(GuiScreen gui) throws CommandException {
         if (tooltip != null) {
             List<String> tooltipLines = gui.getAllElements()
                     .stream()
@@ -39,8 +40,6 @@ public class GuiCommand extends AbstractGuiCommand
             }
 
             return;
-        } else if (CommandUtil.hasFlag("--tooltip", args)) {
-            throw new CommandException("Please specify an element to get the tooltip of.");
         }
 
         List<GuiButton> guiButtons = gui.getButtons();
@@ -48,7 +47,6 @@ public class GuiCommand extends AbstractGuiCommand
 
         List<TextField> textFields = gui.getTextFields();
         textFields.sort(Comparator.comparingInt(GuiElement::getId));
-        boolean verbose = Arrays.asList(args).contains("-v");
 
         List<GuiElement> all = new ArrayList<>(gui.getAllElements());
         all.removeAll(guiButtons);
@@ -58,15 +56,15 @@ public class GuiCommand extends AbstractGuiCommand
         ctx.log(String.format(
             "Screen: %s\nButtons:\n%s\nTextFields:\n%s",
             gui.getHandle().getClass().getName(),
-            table(guiButtons, verbose).insert("on", "type", g -> g.isEnabled() ? "1" : "0").build(),
-            table(textFields, verbose).build()));
-        
+            table(guiButtons).insert("on", "type", g -> g.isEnabled() ? "1" : "0").build(),
+            table(textFields).build()));
+
         if (!all.isEmpty()) {
-            ctx.log("Other:\n" + table(all, verbose).buildCalculatingAnsiWidth());
+            ctx.log("Other:\n" + table(all).buildCalculatingAnsiWidth());
         }
     }
 
-    private <T extends GuiElement> ExtendedTable<T> table(Iterable<T> elements, boolean verbose) {
+    private <T extends GuiElement> ExtendedTable<T> table(Iterable<T> elements) {
         return new ExtendedTable<T>()
             .addAll(elements)
             .withInt("id", GuiElement::getId)

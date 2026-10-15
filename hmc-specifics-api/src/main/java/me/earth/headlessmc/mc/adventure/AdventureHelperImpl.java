@@ -1,9 +1,6 @@
 package me.earth.headlessmc.mc.adventure;
 
 
-import com.google.gson.JsonElement;
-import me.earth.headlessmc.logging.Logger;
-import me.earth.headlessmc.logging.LoggerFactory;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.TranslationArgument;
@@ -22,6 +19,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,7 +31,7 @@ import java.util.regex.Pattern;
  */
 public class AdventureHelperImpl implements AdventureHelper {
     private static final Pattern LOCALIZATION_PATTERN = Pattern.compile("%(?:(\\d+)\\$)?s");
-    private static final Logger LOGGER = LoggerFactory.getLogger(AdventureHelperImpl.class);
+    private static final Logger LOGGER = Logger.getLogger(AdventureHelperImpl.class.getName());
     public final ComponentFlattener flattener;
     public final ANSIComponentSerializer ansiSerializer;
 
@@ -103,14 +101,8 @@ public class AdventureHelperImpl implements AdventureHelper {
     }
 
     @Override
-    public String toAnsiString(String json) {
-        Component jsonComponent = GsonComponentSerializer.gson().deserialize(json);
-        return "\u001B[m" + ansiSerializer.serialize(jsonComponent);
-    }
-
-    @Override
-    public String toAnsiString(JsonElement json) {
-        Component jsonComponent = GsonComponentSerializer.gson().deserializeFromTree(json);
+    public String toAnsiStringJson(String jsonString) {
+        Component jsonComponent = GsonComponentSerializer.gson().deserialize(jsonString);
         return "\u001B[m" + ansiSerializer.serialize(jsonComponent);
     }
 

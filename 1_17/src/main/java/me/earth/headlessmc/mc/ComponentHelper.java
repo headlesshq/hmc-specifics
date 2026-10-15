@@ -1,6 +1,5 @@
 package me.earth.headlessmc.mc;
 
-import com.google.gson.JsonElement;
 import me.earth.headlessmc.mc.adventure.AdventureHelper;
 import me.earth.headlessmc.mc.adventure.AdventureWrapper;
 import net.minecraft.locale.Language;
@@ -29,8 +28,8 @@ public class ComponentHelper {
                 }
 
                 if (adventureHelper != null) {
-                    JsonElement json = Component.Serializer.toJsonTree(component);
-                    ansiString = adventureHelper.toAnsiString(json);
+                    // we relocate our own gson, so we only exchange json Strings with Minecraft
+                    ansiString = adventureHelper.toAnsiStringJson(Component.Serializer.toJson(component));
                 }
             } catch (Exception e) {
                 if (AdventureWrapper.OUTPUT_THROWABLES) {

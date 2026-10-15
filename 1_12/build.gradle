@@ -134,9 +134,8 @@ dependencies {
     }
 
     jarLibs project(':hmc-specifics-api')
-    jarLibs "me.earth.headlessmc:headlessmc-api:${project(':hmc-specifics-api').headlessmc_version}"
-    jarLibs "me.earth.headlessmc:headlessmc-jline:${project(':hmc-specifics-api').headlessmc_version}"
-    jarLibs "me.earth.headlessmc:headlessmc-runtime:${project(':hmc-specifics-api').headlessmc_version}"
+    jarLibs project(':hmc-specifics-tweaker')
+    jarLibs project(path: ':hmc-specifics-api', configuration: 'jline3Bundle')
 }
 
 for (String platform_capitalized : ['Fabric', 'Lexforge']) {
@@ -239,4 +238,10 @@ publishing {
 
 publish {
     dependsOn build
+}
+
+// Older versions of Minecraft ship gson versions that are too old for our dependencies (MinecraftAuth, HeadlessMC auth).
+// So we ship our own gson and relocate it. Version specific code must not reference Minecraft's gson classes.
+tasks.withType(ShadowJar).configureEach {
+    relocate 'com.google.gson', 'me.earth.headlessmc.mc.shadow.gson'
 }

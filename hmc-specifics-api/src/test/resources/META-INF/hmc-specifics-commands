@@ -1,0 +1,7 @@
+# Commands of a fictional other mod
+me.earth.headlessmc.mc.commands.external.GreetCommand
+account me.earth.headlessmc.mc.commands.external.AccountInfoCommand # subcommand of an existing command
+
+# Broken entries must not break the other commands
+me.earth.headlessmc.mc.commands.external.DoesNotExist
+doesnotexist me.earth.headlessmc.mc.commands.external.AccountInfoCommand

@@ -1,7 +1,7 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
-    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'com.gradleup.shadow' version '8.3.9' // 7.x can not relocate Java 21 classes
     id 'java'
     id 'maven-publish'
     id 'xyz.wagyourtail.unimined' version '1.3.10'
@@ -150,12 +150,12 @@ for (String platform_capitalized : ['Fabric', 'Neoforge', 'Lexforge']) {
             }
 
             it.dependencies {
-                exclude(dependency('org.jline:jline:.*'))
                 exclude(dependency('com.google.errorprone:error_prone_annotations:.*'))
-                exclude(dependency('com.google.code.gson:gson:.*'))
                 exclude(dependency('net.java.dev.jna:jna:.*'))
                 exclude(dependency('net.java.dev.jna:jna:.*'))
                 exclude(dependency('org.slf4j:slf4j-api:.*'))
+                // Forge 1.21.6+ ships org.jspecify as a module, shading it causes a split package error
+                exclude(dependency('org.jspecify:jspecify:.*'))
             }
         } else {
             it.configurations += [ project.configurations.fabricJarLibs ]
@@ -167,29 +167,17 @@ for (String platform_capitalized : ['Fabric', 'Neoforge', 'Lexforge']) {
 
 dependencies {
     compileOnly 'org.spongepowered:mixin:0.8.5'
-    lwjglAgent "me.earth.headlessmc:headlessmc-lwjgl:${project(':hmc-specifics-api').headlessmc_version}"
+    lwjglAgent 'me.earth.headlessmc:headlessmc-lwjgl:2.6.2' // dev only, TODO: HeadlessMC v3 lwjgl agent
     implementation ('net.minecraft:launchwrapper:1.12') {
         exclude module: 'log4j-api'
         exclude module: 'log4j-core'
     }
 
     jarLibs project(':hmc-specifics-api')
+    jarLibs project(':hmc-specifics-brigadier')
+    jarLibs project(':hmc-specifics-tweaker')
+    jarLibs project(path: ':hmc-specifics-api', configuration: 'jline3Bundle')
     jarLibs 'com.github.ImpactDevelopment:SimpleTweaker:1.2'
-    jarLibs "me.earth.headlessmc:headlessmc-api:${project(':hmc-specifics-api').headlessmc_version}"
-    jarLibs "me.earth.headlessmc:headlessmc-runtime:${project(':hmc-specifics-api').headlessmc_version}"
-    jarLibs ("me.earth.headlessmc:headlessmc-jline:${project(':hmc-specifics-api').headlessmc_version}") {
-        exclude module: 'jline'
-    }
-
-    forgeJarLibs (group: 'org.jline', name: 'jline-terminal-jna', version: '3.12.1') {
-        exclude module: 'jline'
-        exclude module: 'jline-terminal'
-    }
-
-    fabricJarLibs (group: 'org.jline', name: 'jline-terminal-jna', version: '3.26.3') {
-        exclude module: 'jline'
-        exclude module: 'jline-terminal'
-    }
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
@@ -321,4 +309,10 @@ sourceSets {
 
 test {
     useJUnitPlatform()
+}
+
+// Older versions of Minecraft ship gson versions that are too old for our dependencies (MinecraftAuth, HeadlessMC auth).
+// So we ship our own gson and relocate it. Version specific code must not reference Minecraft's gson classes.
+tasks.withType(ShadowJar).configureEach {
+    relocate 'com.google.gson', 'me.earth.headlessmc.mc.shadow.gson'
 }

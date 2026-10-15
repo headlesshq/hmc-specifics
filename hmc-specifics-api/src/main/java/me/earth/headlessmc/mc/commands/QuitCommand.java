@@ -1,23 +1,28 @@
 package me.earth.headlessmc.mc.commands;
 
-import me.earth.headlessmc.api.HeadlessMc;
-import me.earth.headlessmc.api.command.CommandUtil;
-import me.earth.headlessmc.mc.Minecraft;
+import picocli.CommandLine;
 
+@CommandLine.Command(name = "quit", aliases = {"exit", "stop"}, description = "Quits the running game.")
 public class QuitCommand extends AbstractMinecraftCommand {
-    public QuitCommand(HeadlessMc ctx, Minecraft mc) {
-        super(ctx, mc, "quit", "Quits the running game.");
+    @CommandLine.Option(names = "-force", description = "Calls System.exit instead of quitting Minecraft.")
+    private boolean force;
+
+    @CommandLine.Option(names = "-s", description = "Quits on the current thread instead of scheduling it on the main thread.")
+    private boolean sync;
+
+    public QuitCommand(MinecraftContext ctx) {
+        super(ctx);
     }
 
     @Override
-    public void execute(String line, String... args) {
-        if (CommandUtil.hasFlag("-force", args)) {
+    protected void execute() {
+        if (force) {
             ctx.log("Forcing Minecraft to Exit!");
             System.exit(0);
             return;
         }
 
-        if (CommandUtil.hasFlag("-s", args)) {
+        if (sync) {
             ctx.log("Quitting Minecraft...");
             mc.quit();
         } else {
@@ -26,18 +31,6 @@ public class QuitCommand extends AbstractMinecraftCommand {
                 mc.quit();
             });
         }
-    }
-
-    @Override
-    public boolean matches(String line, String... args) {
-        if (args.length > 0) {
-            String lower = args[0].toLowerCase();
-            return lower.equalsIgnoreCase("quit")
-                || lower.equalsIgnoreCase("exit")
-                || lower.equalsIgnoreCase("stop");
-        }
-
-        return false;
     }
 
 }

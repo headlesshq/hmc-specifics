@@ -1,52 +1,45 @@
 package me.earth.headlessmc.mc.auth;
 
-import me.earth.headlessmc.api.config.Config;
-import me.earth.headlessmc.auth.AccountJsonLoader;
-import me.earth.headlessmc.auth.ValidatedAccount;
-import me.earth.headlessmc.logging.Logger;
-import me.earth.headlessmc.logging.LoggerFactory;
+import io.github.headlesshq.headlessmc.auth.Account;
+import io.github.headlesshq.headlessmc.auth.AuthService;
 import me.earth.headlessmc.mc.Minecraft;
 import me.earth.headlessmc.mc.SpecificProperties;
-import net.lenni0451.commons.httpclient.HttpClient;
-import net.raphimc.minecraftauth.MinecraftAuth;
-import net.raphimc.minecraftauth.step.java.session.StepFullJavaSession;
-import net.raphimc.minecraftauth.util.logging.JavaConsoleLogger;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+/**
+ * Periodically refreshes the account Minecraft is using with the HeadlessMC {@link AuthService},
+ * as Minecraft tokens expire after 24 hours.
+ */
 public class AccountRefreshingService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AccountRefreshingService.class);
+    private static final Logger LOGGER = Logger.getLogger(AccountRefreshingService.class.getName());
 
-    private final Supplier<HttpClient> httpClientFactory = MinecraftAuth::createHttpClient;
+    private final AuthService authService;
+    private final Minecraft mc;
 
     private volatile ScheduledExecutorService executor;
     private volatile Future<?> future;
-    private volatile ValidatedAccount validatedAccount;
+    private volatile Account account;
+
+    public AccountRefreshingService(AuthService authService, Minecraft mc) {
+        this.authService = authService;
+        this.mc = mc;
+    }
 
     public boolean isRunning() {
         return executor != null;
     }
 
-    public synchronized void setValidatedAccount(ValidatedAccount validatedAccount) {
-        ValidatedAccount old = this.validatedAccount;
-        if (old != null
-                && old.getSession().getMcProfile().getId().equals(validatedAccount.getSession().getMcProfile().getId())) {
-            this.validatedAccount = new ValidatedAccount(validatedAccount.getSession(), old.getXuid());
-            saveAccounts(this.validatedAccount);
-        } else {
-            this.validatedAccount = validatedAccount;
-        }
+    public synchronized void setAccount(Account account) {
+        this.account = account;
     }
 
-    public synchronized boolean start(Config config, Minecraft mc) {
+    public synchronized boolean start() {
         if (executor == null) {
             LOGGER.info("Starting account refreshing service");
             executor = Executors.newSingleThreadScheduledExecutor(r -> {
@@ -56,8 +49,7 @@ public class AccountRefreshingService {
                 return thread;
             });
 
-            long timeout = config.get(SpecificProperties.REFRESH_INTERVAL, TimeUnit.HOURS.toSeconds(23));
-            future = executor.schedule(() -> refresh(mc, config), timeout, TimeUnit.SECONDS);
+            schedule(executor);
             return true;
         }
 
@@ -79,97 +71,55 @@ public class AccountRefreshingService {
         return false;
     }
 
-    public synchronized boolean refresh(Minecraft mc, Config config) {
-        McAccount mcAccount = mc.getMcAccount();
-        ValidatedAccount validatedAccount = this.validatedAccount;
-        if (validatedAccount == null
-            || !validatedAccount.getSession().getMcProfile().getId().equals(mcAccount.getUuid())) {
-            List<ValidatedAccount> accounts = getAccounts();
-            validatedAccount = accounts.stream()
-                    .filter(a ->
-                            a.getSession().getMcProfile().getId().equals(mcAccount.getUuid()))
-                    .findFirst()
-                    .orElse(null);
-        }
-
-        if (validatedAccount == null) {
-            LOGGER.error("Failed to refresh account, failed to find account in HeadlessMc/auth.");
-            return false;
-        }
-
-        HttpClient httpClient = httpClientFactory.get();
-        StepFullJavaSession.FullJavaSession session = validatedAccount.getSession();
-        StepFullJavaSession.FullJavaSession refreshed;
+    public synchronized boolean refresh() {
         try {
-            refreshed = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.refresh(
-                    new JavaConsoleLogger(java.util.logging.Logger.getLogger("AccountRefreshingService")),
-                    httpClient,
-                    session
-            );
-        } catch (Exception e) {
-            LOGGER.error("Failed to refresh account", e);
-            return false;
-        }
-
-        ValidatedAccount refreshedAccount = new ValidatedAccount(refreshed, validatedAccount.getXuid());
-        McAccount refreshedMcAccount = new McAccount(
-                refreshedAccount.getName(),
-                refreshedAccount.getSession().getMcProfile().getId(),
-                refreshedAccount.getSession().getMcProfile().getMcToken().getAccessToken()
-        );
-
-        this.validatedAccount = validatedAccount;
-        mc.schedule(() -> mc.setMcAccount(refreshedMcAccount));
-        LOGGER.info("Refreshed account successfully.");
-        saveAccounts(refreshedAccount);
-        ScheduledExecutorService executor = this.executor;
-        if (executor != null) {
-            long timeout = config.get(SpecificProperties.REFRESH_INTERVAL, TimeUnit.HOURS.toSeconds(23));
-            future = executor.schedule(() -> refresh(mc, config), timeout, TimeUnit.SECONDS);
-        }
-
-        return true;
-    }
-
-    private void saveAccounts(ValidatedAccount account) {
-        try {
-            List<ValidatedAccount> accounts = getAccounts();
-            if (accounts.removeIf(a ->
-                    a.getSession().getMcProfile().getId().equals(account.getSession().getMcProfile().getId()))) {
-                accounts.add(account);
-                Path accountsJson = getPath();
-                AccountJsonLoader accountJsonLoader = new AccountJsonLoader();
-                accountJsonLoader.save(accountsJson, accounts);
-                LOGGER.info("Saved account to HeadlessMc/auth.");
+            Account account = findAccount();
+            if (account == null) {
+                LOGGER.severe("Failed to refresh account, failed to find the current account in " + HmcAuth.getAuthDir());
+                return false;
             }
-        } catch (Exception e) { // getParent might be null
-            LOGGER.error("Failed to save accounts json", e);
+
+            Account refreshed = authService.refresh(account);
+            this.account = refreshed;
+            McAccount mcAccount = HmcAuth.toMcAccount(refreshed);
+            mc.schedule(() -> mc.setMcAccount(mcAccount));
+            LOGGER.info("Refreshed account successfully.");
+            return true;
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Failed to refresh account", e);
+            return false;
+        } finally {
+            ScheduledExecutorService executor = this.executor;
+            if (executor != null) {
+                schedule(executor);
+            }
         }
     }
 
-    private List<ValidatedAccount> getAccounts() {
-        try {
-            Path accountsJson = getPath();
-            AccountJsonLoader accountJsonLoader = new AccountJsonLoader();
-            return accountJsonLoader.load(accountsJson);
-        } catch (Exception e) { // getParent might be null
-            LOGGER.error("Failed to load accounts json", e);
+    private Account findAccount() {
+        McAccount mcAccount = mc.getMcAccount();
+        Account account = this.account;
+        if (account != null && HmcAuth.isSameAccount(account, mcAccount)) {
+            return account;
         }
 
-        return Collections.emptyList();
+        for (Account candidate : authService.getAccounts()) {
+            if (HmcAuth.isSameAccount(candidate, mcAccount)) {
+                return candidate;
+            }
+        }
+
+        return null;
     }
 
-    private Path getPath() throws NullPointerException {
-        String javaLibraryPath = System.getProperty("java.library.path");
-        if (javaLibraryPath == null) {
-            throw new NullPointerException("java.library.path is null");
+    private void schedule(ScheduledExecutorService executor) {
+        Future<?> previous = future;
+        if (previous != null) { // refresh might have been called manually, do not schedule twice
+            previous.cancel(false);
         }
 
-        return Paths.get(javaLibraryPath) // extracted
-                .getParent() // launch-uuid
-                .getParent() // HeadlessMC
-                .resolve("auth")
-                .resolve(".accounts.json");
+        long interval = SpecificProperties.getRefreshIntervalSeconds();
+        future = executor.schedule(this::refresh, interval, TimeUnit.SECONDS);
     }
 
 }

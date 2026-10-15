@@ -1,0 +1,18 @@
+# The commands of HMC-Specifics, see me.earth.headlessmc.mc.commands.CommandRegistry.
+# Format: [<parent command>...] <class name>
+picocli.CommandLine$HelpCommand
+me.earth.headlessmc.mc.commands.QuitCommand
+me.earth.headlessmc.mc.commands.RenderCommand
+me.earth.headlessmc.mc.commands.ClickCommand
+me.earth.headlessmc.mc.commands.GuiCommand
+me.earth.headlessmc.mc.commands.TextCommand
+me.earth.headlessmc.mc.commands.CloseCommand
+me.earth.headlessmc.mc.commands.MenuCommand
+me.earth.headlessmc.mc.commands.MemoryCommand
+me.earth.headlessmc.mc.commands.ConnectCommand
+me.earth.headlessmc.mc.commands.DisconnectCommand
+me.earth.headlessmc.mc.commands.KeyCommand
+io.github.headlesshq.headlessmc.commands.auth.AccountCommand
+account me.earth.headlessmc.mc.commands.CurrentAccountCommand
+account me.earth.headlessmc.mc.commands.TokenAccountCommand
+account me.earth.headlessmc.mc.commands.AutoRefreshCommand

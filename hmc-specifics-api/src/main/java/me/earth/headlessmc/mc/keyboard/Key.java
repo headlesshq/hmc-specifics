@@ -1,8 +1,7 @@
 package me.earth.headlessmc.mc.keyboard;
 
-import me.earth.headlessmc.api.HasId;
-import me.earth.headlessmc.api.HasName;
-import org.jetbrains.annotations.NotNull;
+import me.earth.headlessmc.mc.util.HasId;
+import me.earth.headlessmc.mc.util.HasName;
 
 import java.util.Objects;
 
@@ -32,7 +31,7 @@ public class Key implements HasName, HasId, Comparable<Key> {
     }
 
     @Override
-    public int compareTo(@NotNull Key o) {
+    public int compareTo(Key o) {
         return Integer.compare(id, o.id);
     }
 

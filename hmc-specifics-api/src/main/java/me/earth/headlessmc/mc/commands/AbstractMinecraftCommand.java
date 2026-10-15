@@ -1,16 +1,29 @@
 package me.earth.headlessmc.mc.commands;
 
-import me.earth.headlessmc.api.HeadlessMc;
-import me.earth.headlessmc.api.command.AbstractCommand;
 import me.earth.headlessmc.mc.Minecraft;
+import picocli.CommandLine;
 
-public abstract class AbstractMinecraftCommand extends AbstractCommand {
+/**
+ * Base class for picocli commands registered on a {@link MinecraftContext}.
+ */
+public abstract class AbstractMinecraftCommand implements Runnable {
+    protected final MinecraftContext ctx;
     protected final Minecraft mc;
 
-    public AbstractMinecraftCommand(HeadlessMc ctx, Minecraft mc,
-                                    String name, String desc) {
-        super(ctx, name, desc);
-        this.mc = mc;
+    @SuppressWarnings("unused")
+    @CommandLine.Option(names = {"-h", "--help"}, usageHelp = true, description = "Show this help message.")
+    private boolean help;
+
+    public AbstractMinecraftCommand(MinecraftContext ctx) {
+        this.ctx = ctx;
+        this.mc = ctx.getMc();
     }
+
+    @Override
+    public void run() {
+        execute();
+    }
+
+    protected abstract void execute() throws CommandException;
 
 }

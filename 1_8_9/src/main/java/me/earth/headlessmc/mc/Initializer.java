@@ -1,6 +1,5 @@
 package me.earth.headlessmc.mc;
 
-import me.earth.headlessmc.api.config.ConfigImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -18,7 +17,7 @@ public class Initializer {
         }
 
         SpecificsInitializer initializer = new SpecificsInitializer(mc);
-        initializer.init(ConfigImpl.empty());
+        initializer.init();
         LOGGER.info("HMC-Specifics initialized!");
     }
 

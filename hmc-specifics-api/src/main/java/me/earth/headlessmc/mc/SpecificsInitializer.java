@@ -1,23 +1,30 @@
 package me.earth.headlessmc.mc;
 
-import me.earth.headlessmc.api.HeadlessMc;
-import me.earth.headlessmc.api.classloading.ApiClassloadingHelper;
-import me.earth.headlessmc.api.config.Config;
-import me.earth.headlessmc.jline.JLineProperties;
+import io.github.headlesshq.headlessmc.console.ArgSplitter;
+import io.github.headlesshq.headlessmc.console.Console;
+import io.github.headlesshq.headlessmc.console.ConsoleException;
+import io.github.headlesshq.headlessmc.console.ConsoleExtensions;
+import me.earth.headlessmc.mc.auth.AccountRefreshingService;
+import me.earth.headlessmc.mc.auth.HmcAuth;
+import me.earth.headlessmc.mc.auth.McLastUsedAccountService;
 import me.earth.headlessmc.mc.commands.MinecraftContext;
-import me.earth.headlessmc.mc.jline.VersionAgnosticJLineCommandLineReader;
+import me.earth.headlessmc.mc.console.JlineLoader;
+import me.earth.headlessmc.mc.console.StdConsole;
 import me.earth.headlessmc.mc.keyboard.HmcKeyboard;
 import me.earth.headlessmc.mc.log4j.HMCLog4JAppender;
-import me.earth.headlessmc.runtime.RuntimeInitializer;
 
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static me.earth.headlessmc.mc.SpecificProperties.ACCOUNT_REFRESH_ENABLED;
-import static me.earth.headlessmc.mc.SpecificProperties.DEBUG_JLINE;
+import static me.earth.headlessmc.mc.SpecificProperties.*;
 
-public class SpecificsInitializer extends RuntimeInitializer {
+public class SpecificsInitializer {
+    private static final Logger LOGGER = Logger.getLogger(SpecificsInitializer.class.getName());
+    private static final String PROMPT = "> ";
+
+    private final JlineLoader jlineLoader = new JlineLoader();
     private final Minecraft mc;
 
     public SpecificsInitializer(Minecraft mc) {
@@ -25,57 +32,100 @@ public class SpecificsInitializer extends RuntimeInitializer {
         HmcKeyboard.getInstance().getMcKeyboard(mc);
     }
 
-    public void init(Config config) {
-        super.init(config);
-    }
-
-    @Override
-    protected void createCommandContext(HeadlessMc hmc) {
-        MinecraftContext context = new MinecraftContext(hmc, mc);
-        hmc.getCommandLine().setCommandContext(context);
-        hmc.getCommandLine().setBaseContext(context);
-        if (hmc.getConfig().get(ACCOUNT_REFRESH_ENABLED, true)) {
-            context.getAccountRefreshingService().start(hmc.getConfig(), mc);
-        }
-    }
-
-    @Override
-    protected void readCommandLine(HeadlessMc hmc) {
-        if (hmc.getConfig().get(DEBUG_JLINE, false)) {
-            hmc.getLoggingService().setLevel(Level.ALL);
-            hmc.getLoggingService().setFileHandlerLogLevel(Level.ALL);
-            // do we really have to do this? its kinda odd
+    public MinecraftContext init() {
+        if (getBoolean(DEBUG_JLINE, false)) {
             Logger.getLogger("org.jline").setLevel(Level.ALL);
             Arrays.stream(Logger.getLogger("org.jline").getHandlers()).forEach(handler -> handler.setLevel(Level.ALL));
         }
 
-        HMCLog4JAppender.closeTerminalConsoleAppender(hmc.getDeencapsulator());
-        Object remoteCommandLine = ApiClassloadingHelper.installOnOtherInstances(hmc);
-        if (remoteCommandLine == null) {
-            if (hmc.getConfig().get(JLineProperties.ENABLED, true)) {
-                VersionAgnosticJLineCommandLineReader.installAndReadAsyncAndAwaitException(mc, hmc);
-            } else {
-                hmc.getCommandLine().readAsync(hmc);
-            }
-        } else {
-            HMCLog4JAppender.install(remoteCommandLine);
+        HMCLog4JAppender.closeTerminalConsoleAppender();
+        Console console = createConsole();
+        ArgSplitter argSplitter = createArgSplitter();
+
+        HmcAuth auth = new HmcAuth(HmcAuth.getAuthDir());
+        AccountRefreshingService accountRefreshingService = new AccountRefreshingService(auth.getAuthService(), mc);
+        McLastUsedAccountService lastUsedAccountService = new McLastUsedAccountService(
+            auth.getLastUsedAccountService(), accountRefreshingService, mc
+        );
+
+        MinecraftContext context = new MinecraftContext(
+            mc, console, argSplitter, auth.getAuthService(), lastUsedAccountService, accountRefreshingService
+        );
+
+        if (getBoolean(ACCOUNT_REFRESH_ENABLED, true)) {
+            accountRefreshingService.start();
         }
 
-        /* Code to test if the appender works
-        Thread annoyingThread = new Thread(() -> {
-            while (true) {
-                try {
-                    Thread.sleep(100);
-                    System.out.println("SysOut");
-                    LogManager.getLogger("Test").info("TestLogger!");
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        });
+        Thread thread = new Thread(() -> read(context), "HeadlessMc-CommandLine");
+        thread.setDaemon(true);
+        thread.start();
+        return context;
+    }
 
-        annoyingThread.setDaemon(true);
-        annoyingThread.start();*/
+    private Console createConsole() {
+        if (getBoolean(JLINE_ENABLED, true) && jlineLoader.isBundlePresent()) {
+            try {
+                Console console = jlineLoader.loadConsole(getBoolean(JLINE_DUMB, false) || isRunningInCI());
+                HMCLog4JAppender.install(console);
+                return console;
+            } catch (Throwable t) {
+                LOGGER.log(Level.SEVERE, "Failed to load JLine, falling back to simple console", t);
+            }
+        }
+
+        return new StdConsole();
+    }
+
+    /**
+     * The JLine parser does not need a terminal, so we also use it if the JLine console is disabled.
+     */
+    private ArgSplitter createArgSplitter() {
+        if (jlineLoader.isBundlePresent()) {
+            try {
+                return jlineLoader.loadArgSplitter();
+            } catch (Throwable t) {
+                LOGGER.log(Level.SEVERE, "Failed to load JLine ArgSplitter, falling back to splitting at whitespace", t);
+            }
+        }
+
+        return line -> line.trim().split("\\s+");
+    }
+
+    private void read(MinecraftContext context) {
+        Console console = context.getConsole();
+        Optional<ConsoleExtensions> extensions = console.extensions();
+        while (!Thread.currentThread().isInterrupted()) {
+            String line;
+            try {
+                line = extensions.isPresent()
+                    ? extensions.get().read(PROMPT, context.getCompletions())
+                    : console.read();
+            } catch (ConsoleException.Interrupted e) {
+                continue;
+            } catch (ConsoleException e) {
+                LOGGER.log(Level.WARNING, "Stopped reading commands", e);
+                return;
+            }
+
+            try {
+                context.execute(line);
+            } catch (Throwable t) {
+                LOGGER.log(Level.SEVERE, "Failed to execute " + line, t);
+            }
+        }
+    }
+
+    /**
+     * E.g. Github action runners do not provide an interactive Terminal, so we use a dumb one.
+     */
+    private static boolean isRunningInCI() {
+        try {
+            Class.forName("me.earth.mc_runtime_test.McRuntimeTest");
+            LOGGER.warning("Probably running inside CI, using dumb Terminal");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
     }
 
 }

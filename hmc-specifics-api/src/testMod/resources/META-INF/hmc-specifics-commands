@@ -1,0 +1,7 @@
+# Commands of the HMC-Specifics test mod
+me.earth.headlessmc.testmod.GreetCommand
+account me.earth.headlessmc.testmod.AccountTestCommand
+
+# Broken entries, they must be skipped without breaking the other commands
+me.earth.headlessmc.testmod.DoesNotExist
+doesnotexist me.earth.headlessmc.testmod.AccountTestCommand

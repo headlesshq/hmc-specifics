@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "hmcs_test_mod",
+  "version": "1.0.0",
+  "name": "HMC-Specifics Test Mod",
+  "description": "Adds commands to HMC-Specifics, used for testing.",
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "me.earth.headlessmc.testmod.FabricTestMod"
+    ]
+  }
+}

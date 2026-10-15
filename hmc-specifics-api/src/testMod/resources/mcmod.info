@@ -1,0 +1,10 @@
+[
+  {
+    "modid": "hmcs_test_mod",
+    "name": "HMC-Specifics Test Mod",
+    "description": "Adds commands to HMC-Specifics, used for testing.",
+    "version": "1.0.0",
+    "authorList": ["3arthqu4ke"],
+    "dependencies": []
+  }
+]

@@ -1,6 +1,5 @@
 package me.earth.headlessmc.mc;
 
-import com.google.gson.JsonElement;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.JsonOps;
 import me.earth.headlessmc.mc.adventure.AdventureHelper;
@@ -31,8 +30,9 @@ public class ComponentHelper {
                 }
 
                 if (adventureHelper != null) {
-                    JsonElement json = ComponentSerialization.CODEC.encodeStart(JsonOps.INSTANCE, component).getOrThrow();
-                    ansiString = adventureHelper.toAnsiString(json);
+                    // we relocate our own gson, so we must not reference Minecraft's JsonElement here, only its json String
+                    Object json = ComponentSerialization.CODEC.encodeStart(JsonOps.INSTANCE, component).getOrThrow();
+                    ansiString = adventureHelper.toAnsiStringJson(json.toString());
                 }
             } catch (Exception e) {
                 if (AdventureWrapper.OUTPUT_THROWABLES) {

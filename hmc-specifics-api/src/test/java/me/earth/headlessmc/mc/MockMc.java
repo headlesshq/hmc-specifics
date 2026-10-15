@@ -14,6 +14,7 @@ public enum MockMc implements Minecraft {
 
     public String ip;
     public int port = -1;
+    public McAccount account;
 
     @Override
     public Player getPlayer() {
@@ -54,12 +55,12 @@ public enum MockMc implements Minecraft {
 
     @Override
     public McAccount getMcAccount() {
-        return null;
+        return account;
     }
 
     @Override
     public void setMcAccount(McAccount account) {
-
+        this.account = account;
     }
 
     @Override

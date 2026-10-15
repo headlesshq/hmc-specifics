@@ -27,12 +27,27 @@ that case.
 | close      | Closes the menu if ingame.                             |                                         |
 | connect    | Connects you to a server.                              | \<ip\> \<port\>                         |
 | disconnect | Disconnects you from a server.                         |                                         |
-| login      | Log into a Minecraft Account                           |                                         |
+| account    | Manage accounts, alias login. Subcommands: login, list, select, remove, refresh, current, token, autorefresh | -p \<provider\> |
 | msg or .   | Sends a chat message.                                  | \<message\>                             |
 | /          | Sends a chat command.                                  | \<command\>                             |
 
 You can find a good example on how to use these
 commands [here](https://github.com/headlesshq/HeadlessMc/issues/8#issuecomment-1159378478).
+
+### Adding commands from your own mod
+HMC-Specifics uses [picocli](https://picocli.info/) commands. To add your own, write a picocli command
+and list it in a file called `META-INF/hmc-specifics-commands` in your mod jar, one class name per line.
+Subcommands of existing commands are prefixed with the names of their parent commands:
+```
+com.example.MyCommand
+account com.example.MyAccountSubCommand
+```
+Commands are instantiated with a constructor that takes a `me.earth.headlessmc.mc.commands.MinecraftContext`,
+or with a no-arg constructor. If your command (or e.g. its `completionCandidates`) needs anything else,
+implement `me.earth.headlessmc.mc.commands.CommandFactory` and register it in
+`META-INF/services/me.earth.headlessmc.mc.commands.CommandFactory`.
+Implement `me.earth.headlessmc.mc.commands.ScheduledCommand` if your command needs to run on Minecraft's main thread.
+If HMC-Specifics is not installed, these files are simply ignored.
 
 The HMC-Specifics currently support the following Minecraft versions and modloaders:
 | Version | Forge | Fabric | NeoForge |
