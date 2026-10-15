@@ -91,11 +91,12 @@ jobs:
 
       - name: Prepare assets
         run: |
-          mkdir -p out
+          mkdir -p out/version out/latest
           for modloader in fabric forge neoforge; do
             file=$(find jars -type f -name "*${modloader}*release.jar" | head -n 1)
             if [ -f "$file" ]; then
-              cp "$file" "out/hmc-specifics-${{ matrix.mc }}-${modloader}-latest.jar"
+              cp "$file" "out/version/hmc-specifics-${{ matrix.mc }}-${modloader}-${{ needs.matrices.outputs.version }}.jar"
+              cp "$file" "out/latest/hmc-specifics-${{ matrix.mc }}-${modloader}-latest.jar"
             fi
           done
 
@@ -109,14 +110,26 @@ jobs:
           git tag -f ${{ matrix.mc }}-latest ${{ github.sha }}
           git push origin ${{ matrix.mc }}-latest --force
 
-      - name: Create or update release
+      - name: Release version tag
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ matrix.mc }}-${{ needs.matrices.outputs.version }}
+          name: ${{ matrix.mc }}-${{ needs.matrices.outputs.version }}
+          prerelease: true
+          body: "Version [${{ needs.matrices.outputs.version }}](https://github.com/headlesshq/hmc-specifics/releases/tag/${{ needs.matrices.outputs.version }})"
+          files: out/version/*
+          fail_on_unmatched_files: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Release latest tag
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ matrix.mc }}-latest
           name: ${{ matrix.mc }}-latest
           prerelease: true
           body: "Version [${{ needs.matrices.outputs.version }}](https://github.com/headlesshq/hmc-specifics/releases/tag/${{ needs.matrices.outputs.version }})"
-          files: out/*
+          files: out/latest/*
           fail_on_unmatched_files: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
