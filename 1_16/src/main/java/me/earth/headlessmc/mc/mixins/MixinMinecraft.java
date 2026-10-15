@@ -8,6 +8,7 @@ import me.earth.headlessmc.mc.Initializer;
 import me.earth.headlessmc.mc.KeyboardImpl;
 import me.earth.headlessmc.mc.MetricsSourceImpl;
 import me.earth.headlessmc.mc.Minecraft;
+import me.earth.headlessmc.mc.ScreenshotProviderImpl;
 import me.earth.headlessmc.mc.auth.McAccount;
 import me.earth.headlessmc.mc.brigadier.BrigadierWrapper;
 import me.earth.headlessmc.mc.gui.FontRenderer;
@@ -17,6 +18,7 @@ import me.earth.headlessmc.mc.metrics.MetricsSource;
 import me.earth.headlessmc.mc.metrics.MetricsTracker;
 import me.earth.headlessmc.mc.player.AutoRespawn;
 import me.earth.headlessmc.mc.player.Player;
+import me.earth.headlessmc.mc.screenshot.ScreenshotProvider;
 import net.minecraft.client.User;
 import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
@@ -175,6 +177,11 @@ public abstract class MixinMinecraft extends MixinBlockableEventLoop implements 
     @Override
     public MetricsSource getMetricsSource() {
         return MetricsSourceImpl.INSTANCE;
+    }
+
+    @Override
+    public ScreenshotProvider getScreenshotProvider() {
+        return ScreenshotProviderImpl.INSTANCE;
     }
 
 }

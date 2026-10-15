@@ -29,6 +29,7 @@ that case.
 | disconnect | Disconnects you from a server.                         |                                         |
 | respawn    | Respawns you if you are dead. `respawn auto` toggles AutoRespawn. | \<now/auto/status\> \<on/off\> |
 | metrics    | Displays metrics, e.g. TPS, ping, players, FPS, memory. `metrics tps ping` selects metrics by name, group or last part of the name. | \<metric...\> --list --json |
+| screenshot | Saves a screenshot, only if the game renders (not in HeadlessMc's headless mode). | \<file\> --timeout |
 | account    | Manage accounts, alias login. Subcommands: login, list, select, remove, refresh, current, token, autorefresh | -p \<provider\> |
 | msg or .   | Sends a chat message.                                  | \<message\>                             |
 | /          | Sends a chat command.                                  | \<command\>                             |
@@ -87,3 +88,13 @@ Register your own metrics with `MetricsService#register(Metric.of(name, descript
 `me.earth.headlessmc.mc.metrics.MetricsProvider` and list it in
 `META-INF/services/me.earth.headlessmc.mc.metrics.MetricsProvider`.
 The raw, typed values are available through `Minecraft#getMetricsSource()` and `MetricsTracker.getInstance()`.
+
+### Screenshots
+The `screenshot` command saves the last rendered frame as a PNG, `screenshots/hmc_<time>.png` by default.
+This needs a game that renders, e.g. a normal window or a virtual display like Xvfb.
+In HeadlessMc's headless mode nothing is rendered, so screenshots are disabled. The detection can be overridden with
+`-Dhmc.screenshots.enabled=true` or `false`. Other mods can take screenshots from any thread:
+```java
+CompletableFuture<byte[]> png = Screenshots.take(minecraft);
+```
+The PNG is encoded off the main thread, so taking screenshots regularly does not make the game stutter.

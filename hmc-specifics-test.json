@@ -868,6 +868,70 @@
     },
     {
       "type": "SEND",
+      "message": "screenshot"
+    },
+    {
+      "type": "CONTAINS",
+      "message": "Screenshots are not available, because the game does not render",
+      "or": [
+        {
+          "type": "REGEX",
+          "message": ".*Failed to (load|register) command (?!.*(DoesNotExist|doesnotexist)).*",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Failed to load JLine ArgSplitter",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "An error occurred: ",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Command failed",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Couldn't find command for",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Failed to collect metric",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "SEND",
       "message": "gui"
     },
     {
