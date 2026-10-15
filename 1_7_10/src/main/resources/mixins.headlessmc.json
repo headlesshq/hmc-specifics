@@ -17,7 +17,9 @@
     "maxShiftBy": 10
   },
   "client": [
+    "IPlayerControllerMP",
     "MixinGuiNewChat",
-    "MixinNetHandlerPlayClient"
+    "MixinNetHandlerPlayClient",
+    "MixinNetworkManager"
   ]
 }

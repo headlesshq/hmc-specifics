@@ -4,11 +4,14 @@ import com.google.common.util.concurrent.ListenableFuture;
 import me.earth.headlessmc.mc.FontRendererImpl;
 import me.earth.headlessmc.mc.Initializer;
 import me.earth.headlessmc.mc.McKeyHandler;
+import me.earth.headlessmc.mc.MetricsSourceImpl;
 import me.earth.headlessmc.mc.Minecraft;
 import me.earth.headlessmc.mc.auth.McAccount;
 import me.earth.headlessmc.mc.gui.FontRenderer;
 import me.earth.headlessmc.mc.gui.GuiScreen;
 import me.earth.headlessmc.mc.keyboard.Keyboard;
+import me.earth.headlessmc.mc.metrics.MetricsSource;
+import me.earth.headlessmc.mc.metrics.MetricsTracker;
 import me.earth.headlessmc.mc.player.Player;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.GuiMainMenu;
@@ -139,6 +142,21 @@ public abstract class MixinMinecraft implements Minecraft {
     @Override
     public void setMcAccount(McAccount account) {
         this.session = new Session(account.getName(), account.getUuid().toString(), account.getAccessToken(), "mojang");
+    }
+
+    @Inject(method = "runTick", at = @At("HEAD"))
+    private void tickHeadHook(CallbackInfo ci) {
+        MetricsTracker.getInstance().onTickStart();
+    }
+
+    @Inject(method = "runTick", at = @At("RETURN"))
+    private void tickReturnHook(CallbackInfo ci) {
+        MetricsTracker.getInstance().onTickEnd();
+    }
+
+    @Override
+    public MetricsSource getMetricsSource() {
+        return MetricsSourceImpl.INSTANCE;
     }
 
 }

@@ -12,6 +12,9 @@ import me.earth.headlessmc.mc.console.JlineLoader;
 import me.earth.headlessmc.mc.console.StdConsole;
 import me.earth.headlessmc.mc.keyboard.HmcKeyboard;
 import me.earth.headlessmc.mc.log4j.HMCLog4JAppender;
+import me.earth.headlessmc.mc.metrics.DefaultMetrics;
+import me.earth.headlessmc.mc.metrics.MetricsService;
+import me.earth.headlessmc.mc.metrics.MetricsTracker;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -37,6 +40,10 @@ public class SpecificsInitializer {
             Logger.getLogger("org.jline").setLevel(Level.ALL);
             Arrays.stream(Logger.getLogger("org.jline").getHandlers()).forEach(handler -> handler.setLevel(Level.ALL));
         }
+
+        MetricsService metrics = MetricsService.getInstance();
+        DefaultMetrics.registerAll(metrics, mc, MetricsTracker.getInstance());
+        metrics.loadProviders(mc, SpecificsInitializer.class.getClassLoader());
 
         HMCLog4JAppender.closeTerminalConsoleAppender();
         Console console = createConsole();

@@ -4,6 +4,7 @@ import me.earth.headlessmc.mc.auth.McAccount;
 import me.earth.headlessmc.mc.gui.FontRenderer;
 import me.earth.headlessmc.mc.gui.GuiScreen;
 import me.earth.headlessmc.mc.keyboard.Keyboard;
+import me.earth.headlessmc.mc.metrics.MetricsSource;
 import me.earth.headlessmc.mc.player.Player;
 
 import java.util.concurrent.CompletableFuture;
@@ -15,6 +16,7 @@ public enum MockMc implements Minecraft {
     public String ip;
     public int port = -1;
     public McAccount account;
+    public MetricsSource metricsSource = MetricsSource.EMPTY;
 
     @Override
     public Player getPlayer() {
@@ -61,6 +63,11 @@ public enum MockMc implements Minecraft {
     @Override
     public void setMcAccount(McAccount account) {
         this.account = account;
+    }
+
+    @Override
+    public MetricsSource getMetricsSource() {
+        return metricsSource;
     }
 
     @Override

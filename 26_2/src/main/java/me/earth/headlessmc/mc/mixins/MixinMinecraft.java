@@ -7,12 +7,15 @@ import com.mojang.realmsclient.RealmsMainScreen;
 import me.earth.headlessmc.mc.FontRendererImpl;
 import me.earth.headlessmc.mc.Initializer;
 import me.earth.headlessmc.mc.KeyboardImpl;
+import me.earth.headlessmc.mc.MetricsSourceImpl;
 import me.earth.headlessmc.mc.Minecraft;
 import me.earth.headlessmc.mc.auth.McAccount;
 import me.earth.headlessmc.mc.brigadier.BrigadierWrapper;
 import me.earth.headlessmc.mc.gui.FontRenderer;
 import me.earth.headlessmc.mc.gui.GuiScreen;
 import me.earth.headlessmc.mc.keyboard.Keyboard;
+import me.earth.headlessmc.mc.metrics.MetricsSource;
+import me.earth.headlessmc.mc.metrics.MetricsTracker;
 import me.earth.headlessmc.mc.player.Player;
 import net.minecraft.client.User;
 import net.minecraft.client.gui.Gui;
@@ -178,6 +181,21 @@ public abstract class MixinMinecraft extends MixinBlockableEventLoop
         }
 
         return new ArrayList<>();
+    }
+
+    @Inject(method = "tick", at = @At("HEAD"))
+    private void tickHeadHook(CallbackInfo ci) {
+        MetricsTracker.getInstance().onTickStart();
+    }
+
+    @Inject(method = "tick", at = @At("RETURN"))
+    private void tickReturnHook(CallbackInfo ci) {
+        MetricsTracker.getInstance().onTickEnd();
+    }
+
+    @Override
+    public MetricsSource getMetricsSource() {
+        return MetricsSourceImpl.INSTANCE;
     }
 
 }

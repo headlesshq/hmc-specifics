@@ -23,6 +23,8 @@
     "AbstractContainerScreenAccessor",
     "IKeyboardHandler",
     "MixinChatComponent",
-    "MixinClientCommonPacketListenerImpl"
+    "MixinClientCommonPacketListenerImpl",
+    "MixinClientPacketListener",
+    "MixinConnection"
   ]
 }

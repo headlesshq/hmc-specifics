@@ -18,6 +18,7 @@
   },
   "client": [
     "MixinGuiNewChat",
-    "MixinNetHandlerPlayClient"
+    "MixinNetHandlerPlayClient",
+    "MixinNetworkManager"
   ]
 }

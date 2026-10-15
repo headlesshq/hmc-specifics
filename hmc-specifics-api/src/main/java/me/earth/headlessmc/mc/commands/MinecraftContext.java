@@ -10,6 +10,7 @@ import io.github.headlesshq.headlessmc.exceptions.HeadlessMcException;
 import me.earth.headlessmc.mc.Minecraft;
 import me.earth.headlessmc.mc.auth.AccountRefreshingService;
 import me.earth.headlessmc.mc.console.ConsoleWriter;
+import me.earth.headlessmc.mc.metrics.MetricsService;
 import picocli.CommandLine;
 
 import java.io.PrintWriter;
@@ -150,6 +151,10 @@ public class MinecraftContext {
 
     public LastUsedAccountService getLastUsedAccountService() {
         return lastUsedAccountService;
+    }
+
+    public MetricsService getMetricsService() {
+        return MetricsService.getInstance();
     }
 
     public List<CommandRegistry.Entry> getCommands() {

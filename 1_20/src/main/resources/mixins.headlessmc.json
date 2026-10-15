@@ -20,8 +20,10 @@
     "maxShiftBy": 10
   },
   "client": [
+    "IAbstractContainerScreen",
     "MixinChatComponent",
     "MixinClientCommonPacketListenerImpl",
-    "IAbstractContainerScreen"
+    "MixinClientPacketListener",
+    "MixinConnection"
   ]
 }

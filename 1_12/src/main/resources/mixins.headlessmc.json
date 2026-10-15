@@ -18,7 +18,9 @@
     "maxShiftBy": 10
   },
   "client": [
+    "IChunkProviderClient",
     "MixinGuiNewChat",
-    "MixinNetHandlerPlayClient"
+    "MixinNetHandlerPlayClient",
+    "MixinNetworkManager"
   ]
 }

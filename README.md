@@ -27,6 +27,7 @@ that case.
 | close      | Closes the menu if ingame.                             |                                         |
 | connect    | Connects you to a server.                              | \<ip\> \<port\>                         |
 | disconnect | Disconnects you from a server.                         |                                         |
+| metrics    | Displays metrics, e.g. TPS, ping, players, FPS, memory. `metrics tps ping` selects metrics by name, group or last part of the name. | \<metric...\> --list --json |
 | account    | Manage accounts, alias login. Subcommands: login, list, select, remove, refresh, current, token, autorefresh | -p \<provider\> |
 | msg or .   | Sends a chat message.                                  | \<message\>                             |
 | /          | Sends a chat command.                                  | \<command\>                             |
@@ -48,6 +49,20 @@ implement `me.earth.headlessmc.mc.commands.CommandFactory` and register it in
 `META-INF/services/me.earth.headlessmc.mc.commands.CommandFactory`.
 Implement `me.earth.headlessmc.mc.commands.ScheduledCommand` if your command needs to run on Minecraft's main thread.
 If HMC-Specifics is not installed, these files are simply ignored.
+
+### Metrics
+The `metrics` command displays values collected from the client, e.g. `server.tps` (estimated from the game time
+the server sends every second), `server.ping`, `players.list`, `client.fps`, `client.mspt`, `world.*`, `player.*`
+and `jvm.*`. Use `metrics --list` to list all metrics. Other mods can access them through
+`me.earth.headlessmc.mc.metrics.MetricsService.getInstance()`, most metrics have to be collected on Minecraft's main thread:
+```java
+MetricsService metrics = MetricsService.getInstance();
+Future<Map<String, Object>> values = minecraft.schedule(() -> metrics.collect(metrics.select("server.tps", "players")));
+```
+Register your own metrics with `MetricsService#register(Metric.of(name, description, supplier))`, or implement
+`me.earth.headlessmc.mc.metrics.MetricsProvider` and list it in
+`META-INF/services/me.earth.headlessmc.mc.metrics.MetricsProvider`.
+The raw, typed values are available through `Minecraft#getMetricsSource()` and `MetricsTracker.getInstance()`.
 
 The HMC-Specifics currently support the following Minecraft versions and modloaders:
 | Version | Forge | Fabric | NeoForge |

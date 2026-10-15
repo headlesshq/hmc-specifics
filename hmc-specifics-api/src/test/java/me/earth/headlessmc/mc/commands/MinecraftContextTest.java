@@ -5,6 +5,8 @@ import me.earth.headlessmc.mc.auth.AccountRefreshingService;
 import me.earth.headlessmc.mc.auth.HmcAuth;
 import me.earth.headlessmc.mc.auth.McLastUsedAccountService;
 import me.earth.headlessmc.mc.console.RecordingConsole;
+import me.earth.headlessmc.mc.metrics.DefaultMetrics;
+import me.earth.headlessmc.mc.metrics.MetricsTracker;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -154,6 +156,25 @@ public class MinecraftContextTest {
         UUID uuid = UUID.randomUUID();
         assertEquals(uuid, HmcAuth.parseUuid(uuid.toString()));
         assertEquals(uuid, HmcAuth.parseUuid(uuid.toString().replace("-", "")));
+    }
+
+    @Test
+    public void testMetrics() {
+        DefaultMetrics.registerAll(ctx.getMetricsService(), MockMc.INSTANCE, MetricsTracker.getInstance());
+        ctx.execute("metrics tps jvm.processors");
+        assertEquals("server.tps: n/a\njvm.processors: " + Runtime.getRuntime().availableProcessors(), console.joined());
+
+        console.output.clear();
+        ctx.execute("metrics --json server.connected");
+        assertEquals("{\"server.connected\":false}", console.joined());
+
+        console.output.clear();
+        ctx.execute("metrics --list server.tps");
+        assertTrue(console.joined().contains("Server TPS"), console.joined());
+
+        console.output.clear();
+        ctx.execute("metrics notAMetric");
+        assertTrue(console.joined().contains("Unknown metric 'notAMetric'"), console.joined());
     }
 
 }

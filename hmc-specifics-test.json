@@ -740,6 +740,134 @@
     },
     {
       "type": "SEND",
+      "message": "metrics"
+    },
+    {
+      "type": "ENDS_WITH",
+      "message": "player.dead: n/a",
+      "or": [
+        {
+          "type": "REGEX",
+          "message": ".*Failed to (load|register) command (?!.*(DoesNotExist|doesnotexist)).*",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Failed to load JLine ArgSplitter",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "An error occurred: ",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Command failed",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Couldn't find command for",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Failed to collect metric",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "SEND",
+      "message": "metrics client.version --json"
+    },
+    {
+      "type": "REGEX",
+      "message": "\\{\"client\\.version\":\"\\d+\\.\\d+(\\.\\d+)?\"\\}",
+      "or": [
+        {
+          "type": "REGEX",
+          "message": ".*Failed to (load|register) command (?!.*(DoesNotExist|doesnotexist)).*",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Failed to load JLine ArgSplitter",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "An error occurred: ",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Command failed",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Couldn't find command for",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Failed to collect metric",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "SEND",
       "message": "gui"
     },
     {

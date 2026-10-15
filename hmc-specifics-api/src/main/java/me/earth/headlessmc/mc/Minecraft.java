@@ -4,6 +4,7 @@ import me.earth.headlessmc.mc.auth.McAccount;
 import me.earth.headlessmc.mc.gui.FontRenderer;
 import me.earth.headlessmc.mc.gui.GuiScreen;
 import me.earth.headlessmc.mc.keyboard.Keyboard;
+import me.earth.headlessmc.mc.metrics.MetricsSource;
 import me.earth.headlessmc.mc.player.Player;
 import me.earth.headlessmc.mc.scheduling.SchedulesTasks;
 
@@ -80,6 +81,15 @@ public interface Minecraft extends SchedulesTasks, Adapter {
      */
     default List<Map.Entry<String, String>> getCompletions(String line) {
         return new ArrayList<>();
+    }
+
+    /**
+     * Provides the version specific values for the metrics of the {@link me.earth.headlessmc.mc.metrics.MetricsService}.
+     *
+     * @return the MetricsSource for this Minecraft version.
+     */
+    default MetricsSource getMetricsSource() {
+        return MetricsSource.EMPTY;
     }
 
 }
