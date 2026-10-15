@@ -27,6 +27,7 @@ that case.
 | close      | Closes the menu if ingame.                             |                                         |
 | connect    | Connects you to a server.                              | \<ip\> \<port\>                         |
 | disconnect | Disconnects you from a server.                         |                                         |
+| respawn    | Respawns you if you are dead. `respawn auto` toggles AutoRespawn. | \<now/auto/status\> \<on/off\> |
 | metrics    | Displays metrics, e.g. TPS, ping, players, FPS, memory. `metrics tps ping` selects metrics by name, group or last part of the name. | \<metric...\> --list --json |
 | account    | Manage accounts, alias login. Subcommands: login, list, select, remove, refresh, current, token, autorefresh | -p \<provider\> |
 | msg or .   | Sends a chat message.                                  | \<message\>                             |
@@ -34,6 +35,29 @@ that case.
 
 You can find a good example on how to use these
 commands [here](https://github.com/headlesshq/HeadlessMc/issues/8#issuecomment-1159378478).
+
+The HMC-Specifics currently support the following Minecraft versions and modloaders:
+| Version | Forge | Fabric | NeoForge |
+| :-: | :-: | :-: | :-: |
+| 26.3 | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
+| 26.2 | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
+| 26.1 - 26.1.2 | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
+| 1.21 - 1.21.11 | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
+| 1.20.6 | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  |
+| 1.19.4 | :white_check_mark:  | :white_check_mark:  | - |
+| 1.18.2 | :white_check_mark:  | :white_check_mark:  | - |
+| 1.17.1 | :white_check_mark:  | :white_check_mark:  | - |
+| 1.16.5 | :white_check_mark:  | :white_check_mark:  | - |
+| 1.12.2 | :white_check_mark:  | :warning:  | - |
+| 1.8.9 | :white_check_mark:  | :warning:  | - |
+| 1.7.10 | :white_check_mark:  | :warning:  | - |
+
+Versions marked with :warning: have not been tested yet, due to not being supported by HeadlessMC, e.g. fabric legacy
+versions.
+
+### AutoRespawn
+`respawn auto` toggles AutoRespawn, `respawn auto on|off` turns it on or off, and `respawn status` shows whether it is on.
+To turn AutoRespawn on when the game starts, launch the game with `-Dhmc.respawn.auto=true`.
 
 ### Adding commands from your own mod
 HMC-Specifics uses [picocli](https://picocli.info/) commands. To add your own, write a picocli command
@@ -63,22 +87,3 @@ Register your own metrics with `MetricsService#register(Metric.of(name, descript
 `me.earth.headlessmc.mc.metrics.MetricsProvider` and list it in
 `META-INF/services/me.earth.headlessmc.mc.metrics.MetricsProvider`.
 The raw, typed values are available through `Minecraft#getMetricsSource()` and `MetricsTracker.getInstance()`.
-
-The HMC-Specifics currently support the following Minecraft versions and modloaders:
-| Version | Forge | Fabric | NeoForge |
-| :-: | :-: | :-: | :-: |
-| 26.3 | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
-| 26.2 | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
-| 26.1 - 26.1.2 | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
-| 1.21 - 1.21.11 | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
-| 1.20.6 | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  |
-| 1.19.4 | :white_check_mark:  | :white_check_mark:  | - |
-| 1.18.2 | :white_check_mark:  | :white_check_mark:  | - |
-| 1.17.1 | :white_check_mark:  | :white_check_mark:  | - |
-| 1.16.5 | :white_check_mark:  | :white_check_mark:  | - |
-| 1.12.2 | :white_check_mark:  | :warning:  | - |
-| 1.8.9 | :white_check_mark:  | :warning:  | - |
-| 1.7.10 | :white_check_mark:  | :warning:  | - |
-
-Versions marked with :warning: have not been tested yet, due to not being supported by HeadlessMC, e.g. fabric legacy
-versions.

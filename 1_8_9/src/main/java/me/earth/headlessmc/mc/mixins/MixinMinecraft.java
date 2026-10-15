@@ -12,6 +12,7 @@ import me.earth.headlessmc.mc.gui.GuiScreen;
 import me.earth.headlessmc.mc.keyboard.Keyboard;
 import me.earth.headlessmc.mc.metrics.MetricsSource;
 import me.earth.headlessmc.mc.metrics.MetricsTracker;
+import me.earth.headlessmc.mc.player.AutoRespawn;
 import me.earth.headlessmc.mc.player.Player;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.GuiMainMenu;
@@ -152,6 +153,7 @@ public abstract class MixinMinecraft implements Minecraft {
     @Inject(method = "runTick", at = @At("RETURN"))
     private void tickReturnHook(CallbackInfo ci) {
         MetricsTracker.getInstance().onTickEnd();
+        AutoRespawn.getInstance().onTick(this);
     }
 
     @Override

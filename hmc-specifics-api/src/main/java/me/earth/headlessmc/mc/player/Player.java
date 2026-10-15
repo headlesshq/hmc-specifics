@@ -29,4 +29,14 @@ public interface Player extends Adapter {
      */
     void closeScreen();
 
+    /**
+     * @return {@code true} if the player is dead and can respawn, e.g. while the death screen is displayed.
+     */
+    boolean isDead();
+
+    /**
+     * Asks the server to respawn the player, similar to clicking "Respawn" on the death screen.
+     */
+    void requestRespawn();
+
 }

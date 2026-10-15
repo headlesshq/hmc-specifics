@@ -19,6 +19,11 @@ public final class SpecificProperties {
     public static final String AUTO_ACCEPT_SERVER_RESOURCE_PACKS = "hmc.resourcepacks.autoaccept";
 
     /**
+     * Whether {@link me.earth.headlessmc.mc.player.AutoRespawn} is enabled when the game starts.
+     */
+    public static final String AUTO_RESPAWN = "hmc.respawn.auto";
+
+    /**
      * The directory HeadlessMC places its files in, same as HeadlessMC's {@code hmc.files.location}.
      * Can also be set via the {@code HMC_FILES_LOCATION} environment variable.
      */

@@ -13,6 +13,7 @@ me.earth.headlessmc.mc.commands.MetricsCommand
 me.earth.headlessmc.mc.commands.ConnectCommand
 me.earth.headlessmc.mc.commands.DisconnectCommand
 me.earth.headlessmc.mc.commands.KeyCommand
+me.earth.headlessmc.mc.commands.RespawnCommand
 io.github.headlesshq.headlessmc.commands.auth.AccountCommand
 account me.earth.headlessmc.mc.commands.CurrentAccountCommand
 account me.earth.headlessmc.mc.commands.TokenAccountCommand
