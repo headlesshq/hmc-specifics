@@ -152,6 +152,8 @@ for (String platform_capitalized : ['Fabric', 'Neoforge', 'Lexforge']) {
                 exclude(dependency('net.java.dev.jna:jna:.*'))
                 exclude(dependency('net.java.dev.jna:jna:.*'))
                 exclude(dependency('org.slf4j:slf4j-api:.*'))
+                // Forge 1.21.6+ ships org.jspecify as a module, shading it causes a split package error
+                exclude(dependency('org.jspecify:jspecify:.*'))
             }
         } else {
             it.configurations += [ project.configurations.fabricJarLibs ]
