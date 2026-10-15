@@ -17,10 +17,11 @@ public enum MockMc implements Minecraft {
     public int port = -1;
     public McAccount account;
     public MetricsSource metricsSource = MetricsSource.EMPTY;
+    public Player player;
 
     @Override
     public Player getPlayer() {
-        return null;
+        return player;
     }
 
     @Override

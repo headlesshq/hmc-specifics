@@ -3,6 +3,7 @@ package me.earth.headlessmc.mc.mixins;
 import me.earth.headlessmc.mc.player.Player;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.gui.GuiGameOver;
 import net.minecraft.client.gui.GuiIngameMenu;
 import net.minecraft.client.gui.inventory.GuiInventory;
 import org.spongepowered.asm.mixin.Mixin;
@@ -35,6 +36,19 @@ public abstract class MixinEntityPlayerSP implements Player {
     @Override
     public void closeScreen() {
         if (Minecraft.getMinecraft().currentScreen != null) {
+            Minecraft.getMinecraft().displayGuiScreen(null);
+        }
+    }
+
+    @Override
+    public boolean isDead() {
+        return EntityPlayerSP.class.cast(this).getHealth() <= 0.0F;
+    }
+
+    @Override
+    public void requestRespawn() {
+        EntityPlayerSP.class.cast(this).respawnPlayer();
+        if (Minecraft.getMinecraft().currentScreen instanceof GuiGameOver) {
             Minecraft.getMinecraft().displayGuiScreen(null);
         }
     }

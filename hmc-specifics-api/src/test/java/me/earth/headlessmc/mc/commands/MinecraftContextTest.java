@@ -7,6 +7,8 @@ import me.earth.headlessmc.mc.auth.McLastUsedAccountService;
 import me.earth.headlessmc.mc.console.RecordingConsole;
 import me.earth.headlessmc.mc.metrics.DefaultMetrics;
 import me.earth.headlessmc.mc.metrics.MetricsTracker;
+import me.earth.headlessmc.mc.player.AutoRespawn;
+import me.earth.headlessmc.mc.player.MockPlayer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -175,6 +177,68 @@ public class MinecraftContextTest {
         console.output.clear();
         ctx.execute("metrics notAMetric");
         assertTrue(console.joined().contains("Unknown metric 'notAMetric'"), console.joined());
+    }
+
+    @Test
+    public void testRespawn() {
+        try {
+            ctx.execute("respawn");
+            assertEquals("You are not ingame!", console.joined());
+
+            MockPlayer player = new MockPlayer();
+            MockMc.INSTANCE.player = player;
+            console.output.clear();
+            ctx.execute("respawn");
+            assertEquals("You are not dead!", console.joined());
+            assertEquals(0, player.respawnRequests);
+
+            player.dead = true;
+            console.output.clear();
+            ctx.execute("respawn now");
+            assertEquals("Respawning...", console.joined());
+            assertEquals(1, player.respawnRequests);
+        } finally {
+            MockMc.INSTANCE.player = null;
+        }
+    }
+
+    @Test
+    public void testAutoRespawn() {
+        AutoRespawn autoRespawn = AutoRespawn.getInstance();
+        try {
+            autoRespawn.setEnabled(false);
+            ctx.execute("respawn auto");
+            assertTrue(autoRespawn.isEnabled());
+            assertEquals("AutoRespawn enabled.", console.joined());
+
+            console.output.clear();
+            ctx.execute("respawn auto");
+            assertFalse(autoRespawn.isEnabled());
+            assertEquals("AutoRespawn disabled.", console.joined());
+
+            ctx.execute("respawn auto on");
+            assertTrue(autoRespawn.isEnabled());
+            ctx.execute("respawn auto on");
+            assertTrue(autoRespawn.isEnabled());
+
+            console.output.clear();
+            ctx.execute("respawn status");
+            assertEquals("AutoRespawn enabled.", console.joined());
+
+            ctx.execute("respawn auto off");
+            assertFalse(autoRespawn.isEnabled());
+
+            console.output.clear();
+            ctx.execute("respawn status on");
+            assertEquals("'on' can only be used with 'respawn auto'.", console.joined());
+
+            console.output.clear();
+            ctx.execute("respawn auto maybe");
+            assertTrue(console.joined().contains("maybe"), console.joined());
+            assertFalse(autoRespawn.isEnabled());
+        } finally {
+            autoRespawn.setEnabled(false);
+        }
     }
 
 }

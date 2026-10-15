@@ -64,4 +64,14 @@ public abstract class MixinLocalPlayer implements Player {
         }
     }
 
+    @Override
+    public boolean isDead() {
+        return LocalPlayer.class.cast(this).isDeadOrDying();
+    }
+
+    @Override
+    public void requestRespawn() {
+        LocalPlayer.class.cast(this).respawn();
+    }
+
 }

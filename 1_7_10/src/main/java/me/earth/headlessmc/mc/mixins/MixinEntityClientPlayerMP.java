@@ -4,6 +4,7 @@ import me.earth.headlessmc.mc.player.Player;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.gui.GuiGameOver;
 import net.minecraft.client.gui.GuiIngameMenu;
 import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.client.network.NetHandlerPlayClient;
@@ -43,6 +44,19 @@ public abstract class MixinEntityClientPlayerMP implements Player {
     @Override
     public void closeScreen() {
         if (Minecraft.getMinecraft().currentScreen != null) {
+            Minecraft.getMinecraft().displayGuiScreen(null);
+        }
+    }
+
+    @Override
+    public boolean isDead() {
+        return EntityClientPlayerMP.class.cast(this).getHealth() <= 0.0F;
+    }
+
+    @Override
+    public void requestRespawn() {
+        EntityClientPlayerMP.class.cast(this).respawnPlayer();
+        if (Minecraft.getMinecraft().currentScreen instanceof GuiGameOver) {
             Minecraft.getMinecraft().displayGuiScreen(null);
         }
     }

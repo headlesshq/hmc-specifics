@@ -15,6 +15,7 @@ import me.earth.headlessmc.mc.gui.GuiScreen;
 import me.earth.headlessmc.mc.keyboard.Keyboard;
 import me.earth.headlessmc.mc.metrics.MetricsSource;
 import me.earth.headlessmc.mc.metrics.MetricsTracker;
+import me.earth.headlessmc.mc.player.AutoRespawn;
 import me.earth.headlessmc.mc.player.Player;
 import net.minecraft.client.User;
 import net.minecraft.client.gui.screens.ConnectScreen;
@@ -160,6 +161,7 @@ public abstract class MixinMinecraft extends MixinBlockableEventLoop
     @Inject(method = "tick", at = @At("RETURN"))
     private void tickReturnHook(CallbackInfo ci) {
         MetricsTracker.getInstance().onTickEnd();
+        AutoRespawn.getInstance().onTick(this);
     }
 
     @Override
