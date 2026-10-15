@@ -54,11 +54,6 @@ repositories {
         name 'SuperDirMaven'
         url new File(layout.projectDirectory.asFile.getParent() + "/libs").toURI().toURL().toString()
     }
-    maven {
-        // HeadlessMC v3 is not released yet, see the publishHeadlessMcV3 task of hmc-specifics-api
-        name 'HeadlessMcV3Maven'
-        url new File(layout.projectDirectory.asFile.getParent() + "/HeadlessMC/headlessmc-code/build/maven").toURI().toURL().toString()
-    }
     mavenCentral()
 }
 

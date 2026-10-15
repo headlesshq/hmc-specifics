@@ -9,11 +9,6 @@ version "${project_version}"
 repositories {
     // mavenLocal()
     mavenCentral()
-    maven {
-        // HeadlessMC v3 is not released yet, publish HeadlessMC/headlessmc-code with the publishHeadlessMcV3 task
-        name 'HeadlessMcV3Maven'
-        url new File(layout.projectDirectory.asFile.getParent() + "/HeadlessMC/headlessmc-code/build/maven").toURI().toURL().toString()
-    }
 }
 
 try {
@@ -233,14 +228,4 @@ publish {
     dependsOn(javadocJar)
     dependsOn(sourcesJar)
     dependsOn(build)
-}
-
-// HeadlessMC v3 is not released yet. This publishes the Java 8 modules listed in headlessmc-v3-modules.txt
-// from HeadlessMC/headlessmc-code into HeadlessMC/headlessmc-code/build/maven (requires Java 25).
-tasks.register('publishHeadlessMcV3', Exec) {
-    group = 'publishing'
-    workingDir new File(layout.projectDirectory.asFile.getParentFile(), 'HeadlessMC/headlessmc-code')
-    def gradlew = System.getProperty('os.name').toLowerCase().contains('windows') ? 'gradlew.bat' : './gradlew'
-    def modules = file('headlessmc-v3-modules.txt').readLines().findAll { !it.trim().isEmpty() }
-    commandLine([gradlew] + modules.collect { "${it.trim()}:publish".toString() })
 }

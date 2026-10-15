@@ -52,38 +52,17 @@ jobs:
           key: build-${{ inputs.mc }}-${{ hashFiles(format('{0}/[a-z]**', inputs.dir), 'hmc-specifics-api/**', 'hmc-specifics-brigadier/**', 'hmc-specifics-tweaker/**') }}
 
       - if: steps.cache.outputs.cache-hit != 'true'
-        name: Checkout HeadlessMC v3
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-        with:
-          repository: headlesshq/headlessmc
-          ref: hmc-specifics-v3 # TODO: use a released version of HeadlessMC v3
-          path: HeadlessMC/headlessmc-code
-          fetch-depth: 1
-
-      - if: steps.cache.outputs.cache-hit != 'true'
         name: Setup Java
         uses: actions/setup-java@v5
         with:
           distribution: temurin
-          # the last version is the default, HeadlessMC v3 requires Java 25 to build
-          java-version: |
-            25
-            ${{ inputs.java }}
+          java-version: ${{ inputs.java }}
 
       - if: steps.cache.outputs.cache-hit != 'true'
         name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
         with:
           workflow-job-context: '{}' # FIXME: avoid this cache duplication workaround
-
-      - if: steps.cache.outputs.cache-hit != 'true'
-        name: Publish HeadlessMC v3 modules
-        run: |
-          chmod +x gradlew
-          ./gradlew $(grep -v '^\s*$' ../../hmc-specifics-api/headlessmc-v3-modules.txt | sed 's/$/:publish/')
-        working-directory: HeadlessMC/headlessmc-code
-        env:
-          JAVA_HOME: ${{ env.JAVA_HOME_25_X64 }}
 
       - if: |
           steps.cache.outputs.cache-hit != 'true'
