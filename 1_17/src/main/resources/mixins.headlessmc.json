@@ -21,7 +21,9 @@
   },
   "client": [
     "IAbstractContainerScreen",
+    "IMinecraftFps",
     "MixinChatComponent",
-    "MixinClientPacketListener"
+    "MixinClientPacketListener",
+    "MixinConnection"
   ]
 }
