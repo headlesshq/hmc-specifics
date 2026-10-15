@@ -75,6 +75,14 @@ implement `me.earth.headlessmc.mc.commands.CommandFactory` and register it in
 Implement `me.earth.headlessmc.mc.commands.ScheduledCommand` if your command needs to run on Minecraft's main thread.
 If HMC-Specifics is not installed, these files are simply ignored.
 
+To execute commands from your own mod, e.g. from a web interface, use the context HMC-Specifics reads commands with
+and capture the output:
+```java
+CapturingConsole output = new CapturingConsole();
+MinecraftContext.getInstance().execute("metrics tps", output).get(10, TimeUnit.SECONDS); // also waits for ScheduledCommands
+String text = output.getOutput();
+```
+
 ### Metrics
 The `metrics` command displays values collected from the client, e.g. `server.tps` (estimated from the game time
 the server sends every second), `server.ping`, `players.list`, `client.fps`, `client.mspt`, `world.*`, `player.*`

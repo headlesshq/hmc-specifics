@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -27,9 +28,12 @@ import java.util.logging.Logger;
  * The picocli commands are collected by a {@link CommandRegistry}.
  * A new picocli {@link CommandLine} is created for every command, because picocli stores the parsed arguments
  * inside the command objects and {@link ScheduledCommand}s are executed later on the main thread.
+ * Other mods can execute commands with the context HMC-Specifics reads commands with, see {@link #getInstance()},
+ * and capture their output with {@link #execute(String, Console)}.
  */
 public class MinecraftContext {
     private static final Logger LOGGER = Logger.getLogger(MinecraftContext.class.getName());
+    private static volatile MinecraftContext instance;
 
     private final List<PrefixedCommand> prefixedCommands = new ArrayList<>();
     private final ClassLoader classLoader = MinecraftContext.class.getClassLoader();
@@ -59,6 +63,58 @@ public class MinecraftContext {
         updateCommands();
     }
 
+    /**
+     * A copy of the given context that writes to another console and shares the loaded commands.
+     */
+    private MinecraftContext(MinecraftContext context, Console console) {
+        this.mc = context.mc;
+        this.console = console;
+        this.argSplitter = context.argSplitter;
+        this.authService = context.authService;
+        this.lastUsedAccountService = context.lastUsedAccountService;
+        this.accountRefreshingService = context.accountRefreshingService;
+        this.commands = context.updateCommands();
+        prefixedCommands.add(new CommandCommand(this));
+        prefixedCommands.add(new MessageCommand(this, ".", "."));
+        prefixedCommands.add(new MessageCommand(this, "msg", "msg "));
+    }
+
+    /**
+     * @return the context HMC-Specifics reads commands from the console with, or {@code null} if it has not been initialized yet.
+     */
+    public static MinecraftContext getInstance() {
+        return instance;
+    }
+
+    /**
+     * Called by HMC-Specifics when it has been initialized.
+     *
+     * @param context the context HMC-Specifics reads commands from the console with.
+     */
+    public static void setInstance(MinecraftContext context) {
+        instance = context;
+    }
+
+    /**
+     * @param console the console the copy writes to.
+     * @return a copy of this context, whose commands write their output to the given console.
+     */
+    public MinecraftContext withConsole(Console console) {
+        return new MinecraftContext(this, console);
+    }
+
+    /**
+     * Executes a command and writes its output to the given console, instead of the console of this context.
+     * E.g. use a {@link me.earth.headlessmc.mc.console.CapturingConsole} to collect the output.
+     *
+     * @param line the command to execute.
+     * @param console the console to write the output to.
+     * @return a future that completes once the command has been executed, see {@link #executeAsync(String)}.
+     */
+    public CompletableFuture<Void> execute(String line, Console console) {
+        return withConsole(console).executeAsync(line);
+    }
+
     public CommandLine createCommandLine() {
         Commands commands = updateCommands();
         CommandLine commandLine = createRootCommandLine(commands.registry);
@@ -74,8 +130,21 @@ public class MinecraftContext {
     }
 
     public void execute(String line) {
+        executeAsync(line);
+    }
+
+    /**
+     * Executes a command.
+     *
+     * @param line the command to execute.
+     * @return a future that completes once the command has been executed, for {@link ScheduledCommand}s that is
+     * when Minecraft's main thread has executed them. Commands that start threads, e.g. render, might still log afterwards.
+     * The future never completes exceptionally, errors are written to the console like for every command.
+     */
+    public CompletableFuture<Void> executeAsync(String line) {
+        CompletableFuture<Void> done = CompletableFuture.completedFuture(null);
         if (line.trim().isEmpty()) {
-            return;
+            return done;
         }
 
         for (PrefixedCommand prefixedCommand : prefixedCommands) {
@@ -86,7 +155,7 @@ public class MinecraftContext {
                     handleException(t);
                 }
 
-                return;
+                return done;
             }
         }
 
@@ -105,24 +174,33 @@ public class MinecraftContext {
                 log(e.getMessage());
             }
 
-            return;
+            return done;
         } catch (CommandLine.ParameterException e) {
             log(e.getMessage());
             log("Use 'help " + e.getCommandLine().getCommandName() + "' for more information.");
-            return;
+            return done;
         }
 
         if (CommandLine.printHelpIfRequested(parseResult)) {
-            return;
+            return done;
         }
 
         List<CommandLine> commandLines = parseResult.asCommandLineList();
         Object command = commandLines.get(commandLines.size() - 1).getCommand();
         if (command instanceof ScheduledCommand) {
-            mc.schedule(() -> execute(parseResult));
-        } else {
-            execute(parseResult);
+            CompletableFuture<Void> scheduled = new CompletableFuture<>();
+            mc.schedule(() -> {
+                try {
+                    execute(parseResult);
+                } finally {
+                    scheduled.complete(null);
+                }
+            });
+            return scheduled;
         }
+
+        execute(parseResult);
+        return done;
     }
 
     public Completions getCompletions() {

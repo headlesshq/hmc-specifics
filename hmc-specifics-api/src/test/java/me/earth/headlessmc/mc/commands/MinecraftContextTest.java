@@ -4,6 +4,7 @@ import me.earth.headlessmc.mc.MockMc;
 import me.earth.headlessmc.mc.auth.AccountRefreshingService;
 import me.earth.headlessmc.mc.auth.HmcAuth;
 import me.earth.headlessmc.mc.auth.McLastUsedAccountService;
+import me.earth.headlessmc.mc.console.CapturingConsole;
 import me.earth.headlessmc.mc.console.RecordingConsole;
 import me.earth.headlessmc.mc.metrics.DefaultMetrics;
 import me.earth.headlessmc.mc.metrics.MetricsTracker;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Path;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -58,6 +60,32 @@ public class MinecraftContextTest {
         ctx.execute("connect 2b2t.org notAPort");
         assertEquals(500, MockMc.INSTANCE.port);
         assertTrue(console.joined().contains("notAPort"), console.joined());
+    }
+
+    @Test
+    public void testExecuteCapturesOutput() throws Exception {
+        CapturingConsole capturing = new CapturingConsole();
+        ctx.execute("conect 2b2t.org", capturing).get(5, TimeUnit.SECONDS);
+        assertTrue(capturing.getOutput().contains("Couldn't find command for 'conect 2b2t.org'"), capturing.getOutput());
+        assertTrue(console.output.isEmpty(), console.joined());
+    }
+
+    @Test
+    public void testExecuteScheduledCommandCapturesOutput() throws Exception {
+        // the metrics command is a ScheduledCommand, the future completes after it ran on the main thread
+        CapturingConsole capturing = new CapturingConsole();
+        ctx.getMetricsService().register(me.earth.headlessmc.mc.metrics.Metric.of("test.value", "", () -> 42));
+        ctx.execute("metrics test.value --json", capturing).get(5, TimeUnit.SECONDS);
+        assertEquals("{\"test.value\":42}", capturing.getOutput());
+        ctx.getMetricsService().unregister("test.value");
+    }
+
+    @Test
+    public void testCapturingConsoleDelegates() throws Exception {
+        CapturingConsole capturing = new CapturingConsole(console);
+        ctx.execute("connect 2b2t.org", capturing).get(5, TimeUnit.SECONDS);
+        assertEquals("2b2t.org", MockMc.INSTANCE.ip);
+        assertEquals(console.joined(), capturing.getOutput());
     }
 
     @Test
