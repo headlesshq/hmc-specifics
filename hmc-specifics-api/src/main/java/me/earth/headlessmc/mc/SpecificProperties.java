@@ -24,6 +24,13 @@ public final class SpecificProperties {
     public static final String AUTO_RESPAWN = "hmc.respawn.auto";
 
     /**
+     * Overrides the detection of HeadlessMc's headless mode for screenshots, true or false.
+     *
+     * @see me.earth.headlessmc.mc.screenshot.Screenshots#isAvailable()
+     */
+    public static final String SCREENSHOTS_ENABLED = "hmc.screenshots.enabled";
+
+    /**
      * The directory HeadlessMC places its files in, same as HeadlessMC's {@code hmc.files.location}.
      * Can also be set via the {@code HMC_FILES_LOCATION} environment variable.
      */

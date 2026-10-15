@@ -7,6 +7,7 @@ import me.earth.headlessmc.mc.keyboard.Keyboard;
 import me.earth.headlessmc.mc.metrics.MetricsSource;
 import me.earth.headlessmc.mc.player.Player;
 import me.earth.headlessmc.mc.scheduling.SchedulesTasks;
+import me.earth.headlessmc.mc.screenshot.ScreenshotProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -90,6 +91,15 @@ public interface Minecraft extends SchedulesTasks, Adapter {
      */
     default MetricsSource getMetricsSource() {
         return MetricsSource.EMPTY;
+    }
+
+    /**
+     * Takes screenshots for this Minecraft version, use {@link me.earth.headlessmc.mc.screenshot.Screenshots} to take them.
+     *
+     * @return the ScreenshotProvider for this Minecraft version.
+     */
+    default ScreenshotProvider getScreenshotProvider() {
+        return ScreenshotProvider.UNSUPPORTED;
     }
 
 }

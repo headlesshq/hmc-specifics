@@ -59,6 +59,7 @@ public class SpecificsInitializer {
             mc, console, argSplitter, auth.getAuthService(), lastUsedAccountService, accountRefreshingService
         );
 
+        MinecraftContext.setInstance(context);
         if (getBoolean(ACCOUNT_REFRESH_ENABLED, true)) {
             accountRefreshingService.start();
         }

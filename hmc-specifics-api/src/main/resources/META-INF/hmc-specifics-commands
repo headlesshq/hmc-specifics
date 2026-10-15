@@ -10,6 +10,7 @@ me.earth.headlessmc.mc.commands.CloseCommand
 me.earth.headlessmc.mc.commands.MenuCommand
 me.earth.headlessmc.mc.commands.MemoryCommand
 me.earth.headlessmc.mc.commands.MetricsCommand
+me.earth.headlessmc.mc.commands.ScreenshotCommand
 me.earth.headlessmc.mc.commands.ConnectCommand
 me.earth.headlessmc.mc.commands.DisconnectCommand
 me.earth.headlessmc.mc.commands.KeyCommand

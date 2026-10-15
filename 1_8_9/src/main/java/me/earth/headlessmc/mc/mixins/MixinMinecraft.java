@@ -6,6 +6,7 @@ import me.earth.headlessmc.mc.Initializer;
 import me.earth.headlessmc.mc.McKeyHandler;
 import me.earth.headlessmc.mc.MetricsSourceImpl;
 import me.earth.headlessmc.mc.Minecraft;
+import me.earth.headlessmc.mc.ScreenshotProviderImpl;
 import me.earth.headlessmc.mc.auth.McAccount;
 import me.earth.headlessmc.mc.gui.FontRenderer;
 import me.earth.headlessmc.mc.gui.GuiScreen;
@@ -14,6 +15,7 @@ import me.earth.headlessmc.mc.metrics.MetricsSource;
 import me.earth.headlessmc.mc.metrics.MetricsTracker;
 import me.earth.headlessmc.mc.player.AutoRespawn;
 import me.earth.headlessmc.mc.player.Player;
+import me.earth.headlessmc.mc.screenshot.ScreenshotProvider;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.gui.GuiMultiplayer;
@@ -159,6 +161,11 @@ public abstract class MixinMinecraft implements Minecraft {
     @Override
     public MetricsSource getMetricsSource() {
         return MetricsSourceImpl.INSTANCE;
+    }
+
+    @Override
+    public ScreenshotProvider getScreenshotProvider() {
+        return ScreenshotProviderImpl.INSTANCE;
     }
 
 }

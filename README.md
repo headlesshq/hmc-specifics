@@ -29,6 +29,7 @@ that case.
 | disconnect | Disconnects you from a server.                         |                                         |
 | respawn    | Respawns you if you are dead. `respawn auto` toggles AutoRespawn. | \<now/auto/status\> \<on/off\> |
 | metrics    | Displays metrics, e.g. TPS, ping, players, FPS, memory. `metrics tps ping` selects metrics by name, group or last part of the name. | \<metric...\> --list --json |
+| screenshot | Saves a screenshot, only if the game renders (not in HeadlessMc's headless mode). | \<file\> --timeout |
 | account    | Manage accounts, alias login. Subcommands: login, list, select, remove, refresh, current, token, autorefresh | -p \<provider\> |
 | msg or .   | Sends a chat message.                                  | \<message\>                             |
 | /          | Sends a chat command.                                  | \<command\>                             |
@@ -74,6 +75,14 @@ implement `me.earth.headlessmc.mc.commands.CommandFactory` and register it in
 Implement `me.earth.headlessmc.mc.commands.ScheduledCommand` if your command needs to run on Minecraft's main thread.
 If HMC-Specifics is not installed, these files are simply ignored.
 
+To execute commands from your own mod, e.g. from a web interface, use the context HMC-Specifics reads commands with
+and capture the output:
+```java
+CapturingConsole output = new CapturingConsole();
+MinecraftContext.getInstance().execute("metrics tps", output).get(10, TimeUnit.SECONDS); // also waits for ScheduledCommands
+String text = output.getOutput();
+```
+
 ### Metrics
 The `metrics` command displays values collected from the client, e.g. `server.tps` (estimated from the game time
 the server sends every second), `server.ping`, `players.list`, `client.fps`, `client.mspt`, `world.*`, `player.*`
@@ -87,3 +96,13 @@ Register your own metrics with `MetricsService#register(Metric.of(name, descript
 `me.earth.headlessmc.mc.metrics.MetricsProvider` and list it in
 `META-INF/services/me.earth.headlessmc.mc.metrics.MetricsProvider`.
 The raw, typed values are available through `Minecraft#getMetricsSource()` and `MetricsTracker.getInstance()`.
+
+### Screenshots
+The `screenshot` command saves the last rendered frame as a PNG, `screenshots/hmc_<time>.png` by default.
+This needs a game that renders, e.g. a normal window or a virtual display like Xvfb.
+In HeadlessMc's headless mode nothing is rendered, so screenshots are disabled. The detection can be overridden with
+`-Dhmc.screenshots.enabled=true` or `false`. Other mods can take screenshots from any thread:
+```java
+CompletableFuture<byte[]> png = Screenshots.take(minecraft);
+```
+The PNG is encoded off the main thread, so taking screenshots regularly does not make the game stutter.

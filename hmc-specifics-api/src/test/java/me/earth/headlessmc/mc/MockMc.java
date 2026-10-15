@@ -6,6 +6,7 @@ import me.earth.headlessmc.mc.gui.GuiScreen;
 import me.earth.headlessmc.mc.keyboard.Keyboard;
 import me.earth.headlessmc.mc.metrics.MetricsSource;
 import me.earth.headlessmc.mc.player.Player;
+import me.earth.headlessmc.mc.screenshot.ScreenshotProvider;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
@@ -18,6 +19,7 @@ public enum MockMc implements Minecraft {
     public McAccount account;
     public MetricsSource metricsSource = MetricsSource.EMPTY;
     public Player player;
+    public ScreenshotProvider screenshotProvider = ScreenshotProvider.UNSUPPORTED;
 
     @Override
     public Player getPlayer() {
@@ -69,6 +71,11 @@ public enum MockMc implements Minecraft {
     @Override
     public MetricsSource getMetricsSource() {
         return metricsSource;
+    }
+
+    @Override
+    public ScreenshotProvider getScreenshotProvider() {
+        return screenshotProvider;
     }
 
     @Override
