@@ -38,23 +38,18 @@ You can find a good example on how to use these
 commands [here](https://github.com/headlesshq/HeadlessMc/issues/8#issuecomment-1159378478).
 
 The HMC-Specifics currently support the following Minecraft versions and modloaders:
-| Version | Forge | Fabric | NeoForge |
-| :-: | :-: | :-: | :-: |
-| 26.3 | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
-| 26.2 | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
-| 26.1 - 26.1.2 | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
-| 1.21 - 1.21.11 | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
-| 1.20.6 | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  |
-| 1.19.4 | :white_check_mark:  | :white_check_mark:  | - |
-| 1.18.2 | :white_check_mark:  | :white_check_mark:  | - |
-| 1.17.1 | :white_check_mark:  | :white_check_mark:  | - |
-| 1.16.5 | :white_check_mark:  | :white_check_mark:  | - |
-| 1.12.2 | :white_check_mark:  | :warning:  | - |
-| 1.8.9 | :white_check_mark:  | :warning:  | - |
-| 1.7.10 | :white_check_mark:  | :warning:  | - |
-
-Versions marked with :warning: have not been tested yet, due to not being supported by HeadlessMC, e.g. fabric legacy
-versions.
+| Version         | Forge | Fabric | NeoForge |
+|-----------------|-------|--------|----------|
+| 26.1 - 26.3     | ✅    | ✅     | ✅       |
+| 1.21 - 1.21.11  | ✅    | ✅     | ✅       |
+| 1.20.6          | ✅    | ✅     | ✅       |
+| 1.19.4          | ✅    | ✅     | —        |
+| 1.18.2          | ✅    | ✅     | —        |
+| 1.17.1          | ✅    | ✅     | —        |
+| 1.16.5          | ✅    | ✅     | —        |
+| 1.12.2          | ✅    | ✅     | —        |
+| 1.8.9           | ✅    | ✅     | —        |
+| 1.7.10          | ✅    | ✅     | —        |
 
 ### AutoRespawn
 `respawn auto` toggles AutoRespawn, `respawn auto on|off` turns it on or off, and `respawn status` shows whether it is on.
