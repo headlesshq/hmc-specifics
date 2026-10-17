@@ -13,7 +13,7 @@ name: Lifecycle
   workflow_dispatch:
     inputs:
       dirs:
-        description: Comma-delimited directories to build and run (i.e. hmc-specifics-api,1_20,1_21 )
+        description: Comma-delimited directories to build and run (i.e. hmc-specifics-api,versions/1_20,versions/1_21 )
         default: "all"
       ref:
         description: Git ref to checkout before build (i.e. my-feature-branch )
@@ -68,7 +68,8 @@ jobs:
         run: |
           { delimiter="$(openssl rand -hex 8)"
           echo "filter<<${delimiter}"
-          for dir in $(find . -maxdepth 1 -type d -not -path "./.git*" -print | cut -d/ -f2-); do
+          # top level projects (e.g. the api) and the Minecraft version projects in versions/
+          for dir in $(find . versions -mindepth 1 -maxdepth 1 -type d -not -path "./.git*" -not -path ./versions -print | sed 's|^\./||'); do
             echo "'$dir' : ['$dir/**']"
           done; echo "${delimiter}"; } >> "${GITHUB_OUTPUT}"
           echo "${GITHUB_OUTPUT}"
@@ -111,7 +112,7 @@ jobs:
                 comment_body = os.getenv('PR_COMMENT_BODY')
                 print("PR-comment:", comment_body)
                 if comment_body:
-                  pattern = r'Automatic commit: build and run ([0-9\.]*[0-9]*) in ([0-9_]*[0-9]*)'
+                  pattern = r'Automatic commit: build and run ([0-9\.]*[0-9]*) in ((?:versions/)?[0-9_]*[0-9]*)'
                   matches = re.findall(pattern, comment_body)
                   if matches:
                     mc_versions = []
