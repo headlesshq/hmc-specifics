@@ -8,6 +8,6 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(KeyboardHandler.class)
 public interface IKeyboardHandler {
     @Invoker("keyPress")
-    void keyPress(long l, int i, KeyEvent keyEvent);
+    void invokeKeyPress(long l, int i, KeyEvent keyEvent);
 
 }
