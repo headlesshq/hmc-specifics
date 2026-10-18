@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.1](https://github.com/headlesshq/hmc-specifics/compare/3.0.0...3.0.1) (2026-10-18)
+
+
+### Bug Fixes
+
+* rename KeyboardHandler keyPress invoker to avoid infinite recursion on 26.x ([#80](https://github.com/headlesshq/hmc-specifics/issues/80)) ([d6f4911](https://github.com/headlesshq/hmc-specifics/commit/d6f4911affd8e9a2f44acaf75b8375bc618a7cef))
+
 ## [3.0.0](https://github.com/headlesshq/hmc-specifics/compare/2.5.0...3.0.0) (2026-10-15)
 
 
