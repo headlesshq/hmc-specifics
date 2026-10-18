@@ -21,7 +21,7 @@ public class KeyboardImpl extends AbstractKeyboard implements Keyboard {
 
     @Override
     public void performKeyPress(Key key) {
-        ((IKeyboardHandler) mc.keyboardHandler).keyPress(
+        ((IKeyboardHandler) mc.keyboardHandler).invokeKeyPress(
                 mc.getWindow().handle(),
                 InputConstants.PRESS,
                 new KeyEvent(key.getId(), key.getScanCode(), 0)
@@ -30,7 +30,7 @@ public class KeyboardImpl extends AbstractKeyboard implements Keyboard {
 
     @Override
     public void performKeyRelease(Key key) {
-        ((IKeyboardHandler) mc.keyboardHandler).keyPress(
+        ((IKeyboardHandler) mc.keyboardHandler).invokeKeyPress(
                 mc.getWindow().handle(),
                 InputConstants.RELEASE,
                 new KeyEvent(key.getId(), key.getScanCode(), 0)
