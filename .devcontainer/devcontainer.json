@@ -1,0 +1,52 @@
+{
+  "name": "hmc-specifics",
+  "image": "mcr.microsoft.com/devcontainers/base:bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "25",
+      "jdkDistro": "tem",
+      "additionalVersions": "8,17,21",
+      "installGradle": false
+    }
+  },
+  "hostRequirements": {
+    "cpus": 2,
+    "memory": "8gb"
+  },
+  "mounts": [
+    "source=hmc-specifics-gradle,target=/home/vscode/.gradle,type=volume"
+  ],
+  // Set DEVCONTAINER_USER=root when using rootless Docker.
+  "remoteUser": "${localEnv:DEVCONTAINER_USER:vscode}",
+  "containerEnv": {
+    "GRADLE_USER_HOME": "/home/vscode/.gradle"
+  },
+  "onCreateCommand": "bash .devcontainer/on-create.sh",
+  // Building a version takes long; use .devcontainer/use-java.sh for that.
+  "postCreateCommand": "java -version",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "vscjava.vscode-java-pack",
+        "vscjava.vscode-gradle"
+      ],
+      // Every directory is its own Gradle build and no single JDK can import
+      // all of them (Gradle 8.0/8.4 can't run on 21+, Gradle 9 needs 17+), and
+      // each import runs a heavy Forge/NeoForge setup. So nothing is imported
+      // automatically; build with .devcontainer/use-java.sh. To import a single
+      // build, open its directory and set java.import.gradle.enabled: true
+      // and java.import.gradle.java.home: /opt/java/<ci-data.json java>.
+      "settings": {
+        "java.import.gradle.enabled": false,
+        "gradle.autoDetect": "off",
+        "java.configuration.runtimes": [
+          { "name": "JavaSE-1.8", "path": "/opt/java/8" },
+          { "name": "JavaSE-16", "path": "/opt/java/16" },
+          { "name": "JavaSE-17", "path": "/opt/java/17" },
+          { "name": "JavaSE-21", "path": "/opt/java/21" },
+          { "name": "JavaSE-25", "path": "/opt/java/25", "default": true }
+        ]
+      }
+    }
+  }
+}
