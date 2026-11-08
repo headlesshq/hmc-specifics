@@ -1,0 +1,35 @@
+{
+  "name": "hmc-specifics",
+  "image": "mcr.microsoft.com/devcontainers/base:bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "25",
+      "jdkDistro": "tem",
+      "additionalVersions": "8,17,21",
+      "installGradle": false
+    }
+  },
+  "hostRequirements": {
+    "cpus": 2,
+    "memory": "8gb"
+  },
+  "mounts": [
+    "source=hmc-specifics-gradle,target=/home/vscode/.gradle,type=volume"
+  ],
+  // Set DEVCONTAINER_USER=root when using rootless Docker.
+  "remoteUser": "${localEnv:DEVCONTAINER_USER:vscode}",
+  "containerEnv": {
+    "GRADLE_USER_HOME": "/home/vscode/.gradle"
+  },
+  "onCreateCommand": "bash .devcontainer/on-create.sh",
+  // Building a version takes long; use .devcontainer/use-java.sh for that.
+  "postCreateCommand": "java -version",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "vscjava.vscode-java-pack",
+        "vscjava.vscode-gradle"
+      ]
+    }
+  }
+}
