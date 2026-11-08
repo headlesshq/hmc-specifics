@@ -23,11 +23,13 @@ if [ ! -x "$jdk16/bin/java" ]; then
       sha=cb77d9d126f97898dfdc8b5fb694d1e0e5d93d13a0a6cb2aeda76f8635384340
       ;;
     *)
+      arch=
       echo "No Temurin 16 for $(uname -m), skipping" >&2
-      exit 0
       ;;
   esac
+fi
 
+if [ ! -x "$jdk16/bin/java" ] && [ -n "$arch" ]; then
   tmp=$(mktemp -d)
   trap 'rm -rf "$tmp"' EXIT
   curl -fsSL -o "$tmp/jdk16.tar.gz" \
@@ -36,3 +38,12 @@ if [ ! -x "$jdk16/bin/java" ]; then
   sudo mkdir -p "$jdk16"
   sudo tar -xzf "$tmp/jdk16.tar.gz" -C "$jdk16" --strip-components=1
 fi
+
+# Stable per-major JDK paths (/opt/java/<major>) for the VS Code settings in
+# devcontainer.json, independent of the exact SDKMAN version directories.
+sudo mkdir -p /opt/java
+for major in 8 16 17 21 25; do
+  jdk=$(find /usr/local/sdkman/candidates/java -mindepth 1 -maxdepth 1 \
+    -name "$major.*" -printf '%f\n' | sort -V | tail -n 1)
+  [ -z "$jdk" ] || sudo ln -sfn "/usr/local/sdkman/candidates/java/$jdk" "/opt/java/$major"
+done
