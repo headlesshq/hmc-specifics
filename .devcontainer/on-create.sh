@@ -5,8 +5,8 @@ set -eo pipefail
 sudo chown "$(id -u):$(id -g)" "$GRADLE_USER_HOME"
 
 if ! command -v jq > /dev/null; then
-  sudo apt-get update
-  sudo apt-get install -y --no-install-recommends jq
+  sudo apt-get -o Acquire::Retries=5 update
+  sudo apt-get -o Acquire::Retries=5 install -y --no-install-recommends jq
 fi
 
 # versions/1_17 builds with Java 16 in CI. SDKMAN has no Java 16 at all, so
@@ -32,7 +32,8 @@ fi
 if [ ! -x "$jdk16/bin/java" ] && [ -n "$arch" ]; then
   tmp=$(mktemp -d)
   trap 'rm -rf "$tmp"' EXIT
-  curl -fsSL -o "$tmp/jdk16.tar.gz" \
+  curl -fsSL --retry 5 --retry-delay 5 --retry-all-errors --connect-timeout 10 \
+    -o "$tmp/jdk16.tar.gz" \
     "https://github.com/adoptium/temurin16-binaries/releases/download/jdk-16.0.2%2B7/OpenJDK16U-jdk_${arch}_linux_hotspot_16.0.2_7.tar.gz"
   echo "$sha  $tmp/jdk16.tar.gz" | sha256sum -c -
   sudo mkdir -p "$jdk16"
