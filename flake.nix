@@ -22,27 +22,33 @@
       temurin-bin-16 =
         pkgs:
         let
-          jdk16 = pkgs.callPackage (import
-            "${nixpkgs}/pkgs/development/compilers/temurin-bin/jdk-linux-base.nix"
-            {
-              sourcePerArch = {
-                packageType = "jdk";
-                vmType = "hotspot";
-                x86_64 = {
-                  version = "16.0.2";
-                  url = "https://github.com/adoptium/temurin16-binaries/releases/download/jdk-16.0.2%2B7/OpenJDK16U-jdk_x64_linux_hotspot_16.0.2_7.tar.gz";
-                  sha256 = "323d6d7474a359a28eff7ddd0df8e65bd61554a8ed12ef42fd9365349e573c2c";
-                };
-                aarch64 = {
-                  version = "16.0.2";
-                  url = "https://github.com/adoptium/temurin16-binaries/releases/download/jdk-16.0.2%2B7/OpenJDK16U-jdk_aarch64_linux_hotspot_16.0.2_7.tar.gz";
-                  sha256 = "cb77d9d126f97898dfdc8b5fb694d1e0e5d93d13a0a6cb2aeda76f8635384340";
-                };
+          # jdk-linux-base.nix is internal to nixpkgs, not a public API. After
+          # every flake.lock bump, re-check that this path and its arguments
+          # still exist. If the file is gone, 17 stands in with a warning.
+          base = "${nixpkgs}/pkgs/development/compilers/temurin-bin/jdk-linux-base.nix";
+          jdk16 = pkgs.callPackage (import base {
+            sourcePerArch = {
+              packageType = "jdk";
+              vmType = "hotspot";
+              x86_64 = {
+                version = "16.0.2";
+                url = "https://github.com/adoptium/temurin16-binaries/releases/download/jdk-16.0.2%2B7/OpenJDK16U-jdk_x64_linux_hotspot_16.0.2_7.tar.gz";
+                sha256 = "323d6d7474a359a28eff7ddd0df8e65bd61554a8ed12ef42fd9365349e573c2c";
               };
-            }
-          ) { };
+              aarch64 = {
+                version = "16.0.2";
+                url = "https://github.com/adoptium/temurin16-binaries/releases/download/jdk-16.0.2%2B7/OpenJDK16U-jdk_aarch64_linux_hotspot_16.0.2_7.tar.gz";
+                sha256 = "cb77d9d126f97898dfdc8b5fb694d1e0e5d93d13a0a6cb2aeda76f8635384340";
+              };
+            };
+          }) { };
         in
-        if pkgs.stdenv.hostPlatform.isLinux then jdk16 else pkgs.temurin-bin-17;
+        if !pkgs.stdenv.hostPlatform.isLinux then
+          pkgs.temurin-bin-17
+        else if builtins.pathExists base then
+          jdk16
+        else
+          lib.warn "hmc-specifics: ${base} is missing, using JDK 17 for Java 16" pkgs.temurin-bin-17;
 
       # The "java" values of ci-data.json. Temurin 8 has no aarch64-darwin
       # build, so Zulu 8 stands in there.
