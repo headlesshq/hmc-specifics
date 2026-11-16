@@ -1,3 +1,4 @@
 me.earth.headlessmc.mc.commands.AuthCommandFactories$AccountCommandFactory
+me.earth.headlessmc.mc.commands.AuthCommandFactories$LoginShortcutCommandFactory
 me.earth.headlessmc.mc.commands.AuthCommandFactories$AccountCompletionsFactory
 me.earth.headlessmc.mc.commands.AuthCommandFactories$AuthProviderCompletionsFactory

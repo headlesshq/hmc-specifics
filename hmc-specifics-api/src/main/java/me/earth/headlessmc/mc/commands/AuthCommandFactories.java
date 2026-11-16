@@ -3,6 +3,7 @@ package me.earth.headlessmc.mc.commands;
 import io.github.headlesshq.headlessmc.commands.auth.AccountCommand;
 import io.github.headlesshq.headlessmc.commands.auth.AccountCompletions;
 import io.github.headlesshq.headlessmc.commands.auth.AuthProviderCompletions;
+import io.github.headlesshq.headlessmc.commands.auth.LoginShortcutCommand;
 import io.github.headlesshq.headlessmc.console.format.SimpleTable;
 import io.github.headlesshq.headlessmc.console.format.TableBuilder;
 import io.github.headlesshq.headlessmc.console.format.TableProvider;
@@ -25,6 +26,23 @@ public final class AuthCommandFactories {
         @Override
         public AccountCommand create(MinecraftContext ctx) {
             return new AccountCommand(
+                ctx.getLastUsedAccountService(), new SimpleTableProvider(), ctx.getAuthService(), ctx.getConsole()
+            );
+        }
+    }
+
+    /**
+     * The hidden {@code login} command, a shortcut for {@code account login}.
+     */
+    public static final class LoginShortcutCommandFactory implements CommandFactory<LoginShortcutCommand> {
+        @Override
+        public Class<LoginShortcutCommand> getType() {
+            return LoginShortcutCommand.class;
+        }
+
+        @Override
+        public LoginShortcutCommand create(MinecraftContext ctx) {
+            return new LoginShortcutCommand(
                 ctx.getLastUsedAccountService(), new SimpleTableProvider(), ctx.getAuthService(), ctx.getConsole()
             );
         }
