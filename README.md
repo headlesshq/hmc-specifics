@@ -31,7 +31,7 @@ that case.
 | respawn    | Respawns you if you are dead. `respawn auto` toggles AutoRespawn. | \<now/auto/status\> \<on/off\> |
 | metrics    | Displays metrics, e.g. TPS, ping, players, FPS, memory. `metrics tps ping` selects metrics by name, group or last part of the name. | \<metric...\> --list --json |
 | screenshot | Saves a screenshot, only if the game renders (not in HeadlessMc's headless mode). | \<file\> --timeout |
-| account    | Manage accounts, alias login. Subcommands: login, list, select, remove, refresh, current, token, autorefresh | -p \<provider\> |
+| account    | Manage accounts, alias auth. Subcommands: login, list, select, remove, refresh, current, token, autorefresh | -p \<provider\> |
 | msg or .   | Sends a chat message.                                  | \<message\>                             |
 | /          | Sends a chat command.                                  | \<command\>                             |
 
