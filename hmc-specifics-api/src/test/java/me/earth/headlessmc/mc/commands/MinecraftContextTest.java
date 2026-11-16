@@ -132,7 +132,7 @@ public class MinecraftContextTest {
         assertEquals("token123", MockMc.INSTANCE.account.getAccessToken());
 
         console.output.clear();
-        ctx.execute("login current");
+        ctx.execute("account current");
         assertEquals("Current account: Test", console.joined());
     }
 
