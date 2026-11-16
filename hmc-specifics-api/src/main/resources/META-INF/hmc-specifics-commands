@@ -16,6 +16,7 @@ me.earth.headlessmc.mc.commands.DisconnectCommand
 me.earth.headlessmc.mc.commands.KeyCommand
 me.earth.headlessmc.mc.commands.RespawnCommand
 io.github.headlesshq.headlessmc.commands.auth.AccountCommand
+io.github.headlesshq.headlessmc.commands.auth.LoginShortcutCommand
 account me.earth.headlessmc.mc.commands.CurrentAccountCommand
 account me.earth.headlessmc.mc.commands.TokenAccountCommand
 account me.earth.headlessmc.mc.commands.AutoRefreshCommand

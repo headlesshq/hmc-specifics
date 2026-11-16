@@ -123,6 +123,18 @@ public class MinecraftContextTest {
     }
 
     @Test
+    public void testLoginShortcut() {
+        ctx.execute("login --help");
+        String loginHelp = console.joined();
+        assertTrue(loginHelp.contains("login"), loginHelp);
+        assertTrue(loginHelp.contains("Log into an account."), loginHelp);
+
+        console.output.clear();
+        ctx.execute("help");
+        assertFalse(console.joined().contains("login"), console.joined());
+    }
+
+    @Test
     public void testTokenAccount() {
         UUID uuid = UUID.randomUUID();
         ctx.execute("account token Test " + uuid + " token123");
