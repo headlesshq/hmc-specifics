@@ -1,5 +1,17 @@
 # Changelog
 
+## [3.1.0](https://github.com/headlesshq/hmc-specifics/compare/3.0.1...3.1.0) (2026-11-16)
+
+
+### Features
+
+* add the hidden login command as shortcut for account login ([#88](https://github.com/headlesshq/hmc-specifics/issues/88)) ([2456538](https://github.com/headlesshq/hmc-specifics/commit/245653890af97daedef4ffad1209a0581566902f))
+
+
+### Bug Fixes
+
+* **deps:** update headlessmc to 3.0.0-RC9 ([#86](https://github.com/headlesshq/hmc-specifics/issues/86)) ([cecca12](https://github.com/headlesshq/hmc-specifics/commit/cecca127bfeda8fd642678ef441cd3fe6882511c))
+
 ## [3.0.1](https://github.com/headlesshq/hmc-specifics/compare/3.0.0...3.0.1) (2026-10-18)
 
 
